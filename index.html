@@ -13,6 +13,7 @@
 <!-- XLSX -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <style>
 
 body{
@@ -192,6 +193,12 @@ th{
   >
     📷 Open Camera
   </button>
+  <button
+  class="btn-blue"
+  onclick="captureAndRead()"
+>
+  📸 Capture & Read
+</button>
 
   <button
     class="btn-red"
@@ -221,7 +228,10 @@ th{
     border:2px solid #ddd;
   "
 ></video>
-
+<canvas
+  id="captureCanvas"
+  style="display:none"
+></canvas>
 <canvas
   id="captureCanvas"
   style="display:none"
@@ -391,21 +401,73 @@ qr.addEventListener("keypress", e=>{
    CAMERA SCAN
 ========================== */
 
+let stream = null;
+
 window.startCameraScanner = async function(){
 
   try{
+
+    /* ปิดกล้องเดิมก่อน */
+
+    if(stream){
+
+      stream.getTracks().forEach(track=>{
+
+        track.stop();
+
+      });
+
+    }
+
+    /* หา camera ทั้งหมด */
+
+    const devices =
+      await navigator.mediaDevices.enumerateDevices();
+
+    const videoDevices =
+      devices.filter(
+        d => d.kind === "videoinput"
+      );
+
+    let backCamera = null;
+
+    /* หา camera หลัง */
+
+    videoDevices.forEach(device=>{
+
+      const label =
+        device.label.toLowerCase();
+
+      if(
+        label.includes("back") ||
+        label.includes("rear") ||
+        label.includes("environment")
+      ){
+
+        backCamera = device.deviceId;
+
+      }
+
+    });
+
+    /* เปิด camera */
 
     stream =
       await navigator.mediaDevices.getUserMedia({
 
         video:{
 
+          deviceId:
+            backCamera
+            ? { exact: backCamera }
+            : undefined,
+
           facingMode:{
             ideal:"environment"
           },
 
-          width:{ideal:1920},
-          height:{ideal:1080}
+          width:{ ideal:1920 },
+          height:{ ideal:1080 }
 
         },
 
@@ -420,30 +482,17 @@ window.startCameraScanner = async function(){
 
     video.srcObject = stream;
 
+    await video.play();
+
   }
 
   catch(err){
 
+    console.error(err);
+
     alert(
-      "Cannot open camera : " + err
+      "Cannot open back camera"
     );
-
-  }
-
-}
-window.stopCameraScanner = function(){
-
-  if(stream){
-
-    stream.getTracks().forEach(track=>{
-
-      track.stop();
-
-    });
-
-    document.getElementById(
-      "cameraPreview"
-    ).srcObject = null;
 
   }
 
@@ -945,6 +994,123 @@ window.exportExcel = function(){
 }
 
 </script>
+window.captureAndRead = async function(){
+
+  try{
+
+    const video =
+      document.getElementById(
+        "cameraPreview"
+      );
+
+    const canvas =
+      document.getElementById(
+        "captureCanvas"
+      );
+
+    const ctx =
+      canvas.getContext("2d");
+
+    /* capture image */
+
+    canvas.width =
+      video.videoWidth;
+
+    canvas.height =
+      video.videoHeight;
+
+    ctx.drawImage(
+      video,
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
+
+    /* convert image */
+
+    const imageData =
+      canvas.toDataURL("image/png");
+
+    alert("⏳ Reading document...");
+
+    /* OCR */
+
+    const result =
+      await Tesseract.recognize(
+
+        imageData,
+
+        "eng+tha"
+
+      );
+
+    const text =
+      result.data.text;
+
+    console.log(text);
+
+    alert(
+      "✅ OCR Success"
+    );
+
+    processOCRText(text);
+
+  }
+
+  catch(err){
+
+    console.error(err);
+
+    alert(
+      "OCR Error"
+    );
+
+  }
+
+}
+function processOCRText(text){
+
+  const rows =
+    text.split("\\n")
+    .filter(x=>x.trim() !== "");
+
+  let excelData = [];
+
+  rows.forEach((row,index)=>{
+
+    excelData.push({
+
+      No:index+1,
+      Text:row
+
+    });
+
+  });
+
+  exportOCRExcel(excelData);
+
+}
+function exportOCRExcel(data){
+
+  const wb =
+    XLSX.utils.book_new();
+
+  const ws =
+    XLSX.utils.json_to_sheet(data);
+
+  XLSX.utils.book_append_sheet(
+    wb,
+    ws,
+    "OCR Result"
+  );
+
+  XLSX.writeFile(
+    wb,
+    "document_ocr.xlsx"
+  );
+
+}
 
 </body>
 </html>
