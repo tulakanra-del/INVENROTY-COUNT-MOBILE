@@ -1,21 +1,17 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-
 <title>INVENTORY COUNT SYSTEM</title>
-
-<!-- QR CAMERA -->
-<script src="https://unpkg.com/html5-qrcode"></script>
 
 <!-- XLSX -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 
+<!-- OCR -->
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-<style>
 
+<style>
 body{
   font-family:Arial,sans-serif;
   background:#f4f6f9;
@@ -108,11 +104,6 @@ th{
   background:#fff7cc;
 }
 
-#reader{
-  width:320px;
-  margin-top:15px;
-}
-
 #summaryWrapper{
   margin-top:20px;
   border:1px solid #ddd;
@@ -154,8 +145,17 @@ th{
   font-weight:bold;
 }
 
-</style>
+.video-box{
+  margin-top:15px;
+}
 
+#cameraPreview{
+  width:100%;
+  max-width:500px;
+  border-radius:12px;
+  border:2px solid #ddd;
+}
+</style>
 </head>
 
 <body>
@@ -165,27 +165,20 @@ th{
 <h2>📦 INVENTORY COUNT SYSTEM</h2>
 
 <div class="scan-row">
+  <select id="rowSelect"></select>
 
-<select id="rowSelect"></select>
-
-<input
-  id="qrInput"
-  placeholder="Scan QR Code..."
-  autofocus
-/>
-
+  <input
+    id="qrInput"
+    placeholder="Scan QR Code..."
+    autofocus
+  />
 </div>
 
 <div id="duplicateAlert">
 ⚠ Duplicate Item
 </div>
 
-<div style="
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-  margin-top:10px;
-">
+<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;">
 
   <button
     class="btn-blue"
@@ -193,12 +186,13 @@ th{
   >
     📷 Open Camera
   </button>
+
   <button
-  class="btn-blue"
-  onclick="captureAndRead()"
->
-  📸 Capture & Read
-</button>
+    class="btn-blue"
+    onclick="captureAndRead()"
+  >
+    📸 Capture & Read
+  </button>
 
   <button
     class="btn-red"
@@ -209,49 +203,36 @@ th{
 
   <button
     class="btn-blue"
-    onclick="captureDocument()"
+    onclick="exportExcel()"
   >
-    📄 Scan Document
+    Export Excel
+  </button>
+
+  <button
+    class="btn-red"
+    onclick="clearAll()"
+  >
+    Clear
   </button>
 
 </div>
 
-<video
-  id="cameraPreview"
-  autoplay
-  playsinline
-  style="
-    width:100%;
-    max-width:500px;
-    margin-top:15px;
-    border-radius:12px;
-    border:2px solid #ddd;
-  "
-></video>
+<div class="video-box">
+  <video
+    id="cameraPreview"
+    autoplay
+    playsinline
+  ></video>
+</div>
+
 <canvas
   id="captureCanvas"
   style="display:none"
 ></canvas>
-<canvas
-  id="captureCanvas"
-  style="display:none"
-></canvas>
-
-<button class="btn-blue" onclick="exportExcel()">
-Export Excel
-</button>
-
-<button class="btn-red" onclick="clearAll()">
-Clear
-</button>
-
-<div id="reader"></div>
 
 <!-- TABLE -->
 <div class="table-container">
-
 <table>
-
 <thead>
 <tr>
 <th>Row</th>
@@ -268,11 +249,8 @@ Clear
 <th>Action</th>
 </tr>
 </thead>
-
 <tbody id="tb"></tbody>
-
 </table>
-
 </div>
 
 <!-- SUMMARY -->
@@ -283,10 +261,6 @@ Clear
 </div>
 
 <script type="module">
-
-/* ==========================
-   FIREBASE
-========================== */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
@@ -301,27 +275,19 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* ==========================
-   🔥 PUT YOUR FIREBASE CONFIG
+   FIREBASE CONFIG
 ========================== */
 
 const firebaseConfig = {
-
   apiKey: "YOUR_API_KEY",
-
   authDomain: "YOUR_AUTH_DOMAIN",
-
   projectId: "YOUR_PROJECT_ID",
-
   storageBucket: "YOUR_STORAGE_BUCKET",
-
   messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-
   appId: "YOUR_APP_ID"
-
 };
 
 const app = initializeApp(firebaseConfig);
-
 const db = getFirestore(app);
 
 /* ==========================
@@ -332,17 +298,12 @@ let data = [];
 let stream = null;
 let latestRowFocus = "";
 
-const tb =
-document.getElementById("tb");
-
-const qr =
-document.getElementById("qrInput");
-
-const rowSelect =
-document.getElementById("rowSelect");
+const tb = document.getElementById("tb");
+const qr = document.getElementById("qrInput");
+const rowSelect = document.getElementById("rowSelect");
 
 const currentUser =
-prompt("Input User Name") || "UNKNOWN";
+  prompt("Input User Name") || "UNKNOWN";
 
 /* ==========================
    ROW SELECT
@@ -369,10 +330,8 @@ onSnapshot(collection(db,"inventory"), snapshot=>{
   snapshot.forEach(d=>{
 
     data.push({
-
       id:d.id,
       ...d.data()
-
     });
 
   });
@@ -387,51 +346,38 @@ onSnapshot(collection(db,"inventory"), snapshot=>{
 
 qr.addEventListener("keypress", e=>{
 
-  if(e.key==="Enter"){
+  if(e.key === "Enter"){
 
     scan(qr.value);
-
-    qr.value="";
+    qr.value = "";
 
   }
 
 });
 
 /* ==========================
-   CAMERA SCAN
+   CAMERA
 ========================== */
-
-let stream = null;
 
 window.startCameraScanner = async function(){
 
   try{
 
-    /* ปิดกล้องเดิมก่อน */
-
     if(stream){
 
       stream.getTracks().forEach(track=>{
-
         track.stop();
-
       });
 
     }
-
-    /* หา camera ทั้งหมด */
 
     const devices =
       await navigator.mediaDevices.enumerateDevices();
 
     const videoDevices =
-      devices.filter(
-        d => d.kind === "videoinput"
-      );
+      devices.filter(d=>d.kind === "videoinput");
 
     let backCamera = null;
-
-    /* หา camera หลัง */
 
     videoDevices.forEach(device=>{
 
@@ -450,13 +396,10 @@ window.startCameraScanner = async function(){
 
     });
 
-    /* เปิด camera */
-
     stream =
       await navigator.mediaDevices.getUserMedia({
 
         video:{
-
           deviceId:
             backCamera
             ? { exact: backCamera }
@@ -468,7 +411,6 @@ window.startCameraScanner = async function(){
 
           width:{ ideal:1920 },
           height:{ ideal:1080 }
-
         },
 
         audio:false
@@ -476,9 +418,7 @@ window.startCameraScanner = async function(){
       });
 
     const video =
-      document.getElementById(
-        "cameraPreview"
-      );
+      document.getElementById("cameraPreview");
 
     video.srcObject = stream;
 
@@ -489,66 +429,89 @@ window.startCameraScanner = async function(){
   catch(err){
 
     console.error(err);
-
-    alert(
-      "Cannot open back camera"
-    );
+    alert("Cannot open back camera");
 
   }
 
 }
-window.captureDocument = async function(){
 
-  const video =
+window.stopCameraScanner = function(){
+
+  if(stream){
+
+    stream.getTracks().forEach(track=>{
+      track.stop();
+    });
+
     document.getElementById(
       "cameraPreview"
-    );
+    ).srcObject = null;
 
-  const canvas =
-    document.getElementById(
-      "captureCanvas"
-    );
-
-  const ctx =
-    canvas.getContext("2d");
-
-  canvas.width =
-    video.videoWidth;
-
-  canvas.height =
-    video.videoHeight;
-
-  ctx.drawImage(
-    video,
-    0,
-    0,
-    canvas.width,
-    canvas.height
-  );
-
-  const imageData =
-    canvas.toDataURL("image/png");
-
-  alert("⏳ Reading document...");
-
-  const result =
-    await Tesseract.recognize(
-      imageData,
-      'eng+tha'
-    );
-
-  const text =
-    result.data.text;
-
-  console.log(text);
-
-  processOCRText(text);
+  }
 
 }
+
+/* ==========================
+   OCR
+========================== */
+
+window.captureAndRead = async function(){
+
+  try{
+
+    const video =
+      document.getElementById("cameraPreview");
+
+    const canvas =
+      document.getElementById("captureCanvas");
+
+    const ctx = canvas.getContext("2d");
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    ctx.drawImage(
+      video,
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
+
+    const imageData =
+      canvas.toDataURL("image/png");
+
+    alert("⏳ Reading document...");
+
+    const result =
+      await Tesseract.recognize(
+        imageData,
+        "eng+tha"
+      );
+
+    const text = result.data.text;
+
+    console.log(text);
+
+    alert("✅ OCR Success");
+
+    processOCRText(text);
+
+  }
+
+  catch(err){
+
+    console.error(err);
+    alert("OCR Error");
+
+  }
+
+}
+
 function processOCRText(text){
 
   const rows =
-    text.split("\\n")
+    text.split("\n")
     .filter(x=>x.trim() !== "");
 
   let excelData = [];
@@ -556,15 +519,33 @@ function processOCRText(text){
   rows.forEach((row,index)=>{
 
     excelData.push({
-
-      No:index+1,
+      No:index + 1,
       Text:row
-
     });
 
   });
 
   exportOCRExcel(excelData);
+
+}
+
+function exportOCRExcel(data){
+
+  const wb = XLSX.utils.book_new();
+
+  const ws =
+    XLSX.utils.json_to_sheet(data);
+
+  XLSX.utils.book_append_sheet(
+    wb,
+    ws,
+    "OCR Result"
+  );
+
+  XLSX.writeFile(
+    wb,
+    "document_ocr.xlsx"
+  );
 
 }
 
@@ -594,8 +575,6 @@ async function scan(v){
   const time =
     new Date().toLocaleString();
 
-  /* DUPLICATE CHECK */
-
   const snapshot =
     await getDocs(
       collection(db,"inventory")
@@ -608,9 +587,7 @@ async function scan(v){
     const item = doc.data();
 
     if(item.key === v){
-
       duplicate = true;
-
     }
 
   });
@@ -624,8 +601,6 @@ async function scan(v){
     return;
 
   }
-
-  /* REMARK */
 
   let duplicateRows = [];
 
@@ -653,12 +628,9 @@ async function scan(v){
 
   }
 
-  /* SAVE */
-
   await addDoc(
     collection(db,"inventory"),
     {
-
       row,
       line,
       location,
@@ -670,28 +642,7 @@ async function scan(v){
       time,
       key:v,
       user:currentUser
-
     }
-  );
-
-}
-function exportOCRExcel(data){
-
-  const wb =
-    XLSX.utils.book_new();
-
-  const ws =
-    XLSX.utils.json_to_sheet(data);
-
-  XLSX.utils.book_append_sheet(
-    wb,
-    ws,
-    "OCR Result"
-  );
-
-  XLSX.writeFile(
-    wb,
-    "document_ocr.xlsx"
   );
 
 }
@@ -743,16 +694,6 @@ function render(){
 
   });
 
-  /* TABLE AUTO SCROLL */
-
-  const tableBox =
-    document.querySelector(
-      ".table-container"
-    );
-
-  tableBox.scrollTop =
-    tableBox.scrollHeight;
-
   renderSummary();
 
 }
@@ -784,10 +725,8 @@ function renderSummary(){
     if(!s[x.row][x.part]){
 
       s[x.row][x.part] = {
-
         c:0,
         q:x.qty
-
       };
 
     }
@@ -819,14 +758,9 @@ function renderSummary(){
 
     Object.keys(s[r]).forEach(p=>{
 
-      let c =
-        s[r][p].c;
-
-      let q =
-        s[r][p].q;
-
-      let total =
-        c*q;
+      let c = s[r][p].c;
+      let q = s[r][p].q;
+      let total = c*q;
 
       totalUnit += c;
       totalQty += total;
@@ -904,10 +838,7 @@ window.clearAll = async function(){
 
 window.exportExcel = function(){
 
-  let wb =
-    XLSX.utils.book_new();
-
-  /* RAW DATA */
+  let wb = XLSX.utils.book_new();
 
   let ws1 =
     XLSX.utils.json_to_sheet(data);
@@ -917,8 +848,6 @@ window.exportExcel = function(){
     ws1,
     "RawData"
   );
-
-  /* SUMMARY */
 
   let s = {};
 
@@ -956,23 +885,19 @@ window.exportExcel = function(){
       totalQty += total;
 
       summarySheet.push({
-
         Row:r,
         Part:p,
         Unit:c,
         Qty:total
-
       });
 
     });
 
     summarySheet.push({
-
       Row:r,
       Part:"TOTAL",
       Unit:totalUnit,
       Qty:totalQty
-
     });
 
   });
@@ -994,123 +919,6 @@ window.exportExcel = function(){
 }
 
 </script>
-window.captureAndRead = async function(){
-
-  try{
-
-    const video =
-      document.getElementById(
-        "cameraPreview"
-      );
-
-    const canvas =
-      document.getElementById(
-        "captureCanvas"
-      );
-
-    const ctx =
-      canvas.getContext("2d");
-
-    /* capture image */
-
-    canvas.width =
-      video.videoWidth;
-
-    canvas.height =
-      video.videoHeight;
-
-    ctx.drawImage(
-      video,
-      0,
-      0,
-      canvas.width,
-      canvas.height
-    );
-
-    /* convert image */
-
-    const imageData =
-      canvas.toDataURL("image/png");
-
-    alert("⏳ Reading document...");
-
-    /* OCR */
-
-    const result =
-      await Tesseract.recognize(
-
-        imageData,
-
-        "eng+tha"
-
-      );
-
-    const text =
-      result.data.text;
-
-    console.log(text);
-
-    alert(
-      "✅ OCR Success"
-    );
-
-    processOCRText(text);
-
-  }
-
-  catch(err){
-
-    console.error(err);
-
-    alert(
-      "OCR Error"
-    );
-
-  }
-
-}
-function processOCRText(text){
-
-  const rows =
-    text.split("\\n")
-    .filter(x=>x.trim() !== "");
-
-  let excelData = [];
-
-  rows.forEach((row,index)=>{
-
-    excelData.push({
-
-      No:index+1,
-      Text:row
-
-    });
-
-  });
-
-  exportOCRExcel(excelData);
-
-}
-function exportOCRExcel(data){
-
-  const wb =
-    XLSX.utils.book_new();
-
-  const ws =
-    XLSX.utils.json_to_sheet(data);
-
-  XLSX.utils.book_append_sheet(
-    wb,
-    ws,
-    "OCR Result"
-  );
-
-  XLSX.writeFile(
-    wb,
-    "document_ocr.xlsx"
-  );
-
-}
 
 </body>
 </html>
