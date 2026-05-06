@@ -179,9 +179,53 @@ th{
 ⚠ Duplicate Item
 </div>
 
-<button class="btn-blue" onclick="startCameraScanner()">
-📷 Open Camera
-</button>
+<div style="
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:10px;
+">
+
+  <button
+    class="btn-blue"
+    onclick="startCameraScanner()"
+  >
+    📷 Open Camera
+  </button>
+
+  <button
+    class="btn-red"
+    onclick="stopCameraScanner()"
+  >
+    ❌ Close Camera
+  </button>
+
+  <button
+    class="btn-blue"
+    onclick="captureDocument()"
+  >
+    📄 Scan Document
+  </button>
+
+</div>
+
+<video
+  id="cameraPreview"
+  autoplay
+  playsinline
+  style="
+    width:100%;
+    max-width:500px;
+    margin-top:15px;
+    border-radius:12px;
+    border:2px solid #ddd;
+  "
+></video>
+
+<canvas
+  id="captureCanvas"
+  style="display:none"
+></canvas>
 
 <button class="btn-blue" onclick="exportExcel()">
 Export Excel
@@ -275,6 +319,7 @@ const db = getFirestore(app);
 ========================== */
 
 let data = [];
+let stream = null;
 let latestRowFocus = "";
 
 const tb =
@@ -346,37 +391,131 @@ qr.addEventListener("keypress", e=>{
    CAMERA SCAN
 ========================== */
 
-window.startCameraScanner = function(){
+window.startCameraScanner = async function(){
 
-  const html5QrCode =
-    new Html5Qrcode("reader");
+  try{
 
-  Html5Qrcode.getCameras().then(devices=>{
+    stream =
+      await navigator.mediaDevices.getUserMedia({
 
-    if(devices && devices.length){
+        video:{
 
-      html5QrCode.start(
+          facingMode:{
+            ideal:"environment"
+          },
 
-        devices[0].id,
-
-        {
-          fps:10,
-          qrbox:250
-        },
-
-        qrCodeMessage=>{
-
-          scan(qrCodeMessage);
+          width:{ideal:1920},
+          height:{ideal:1080}
 
         },
 
-        errorMessage=>{}
+        audio:false
 
+      });
+
+    const video =
+      document.getElementById(
+        "cameraPreview"
       );
 
-    }
+    video.srcObject = stream;
+
+  }
+
+  catch(err){
+
+    alert(
+      "Cannot open camera : " + err
+    );
+
+  }
+
+}
+window.stopCameraScanner = function(){
+
+  if(stream){
+
+    stream.getTracks().forEach(track=>{
+
+      track.stop();
+
+    });
+
+    document.getElementById(
+      "cameraPreview"
+    ).srcObject = null;
+
+  }
+
+}
+window.captureDocument = async function(){
+
+  const video =
+    document.getElementById(
+      "cameraPreview"
+    );
+
+  const canvas =
+    document.getElementById(
+      "captureCanvas"
+    );
+
+  const ctx =
+    canvas.getContext("2d");
+
+  canvas.width =
+    video.videoWidth;
+
+  canvas.height =
+    video.videoHeight;
+
+  ctx.drawImage(
+    video,
+    0,
+    0,
+    canvas.width,
+    canvas.height
+  );
+
+  const imageData =
+    canvas.toDataURL("image/png");
+
+  alert("⏳ Reading document...");
+
+  const result =
+    await Tesseract.recognize(
+      imageData,
+      'eng+tha'
+    );
+
+  const text =
+    result.data.text;
+
+  console.log(text);
+
+  processOCRText(text);
+
+}
+function processOCRText(text){
+
+  const rows =
+    text.split("\\n")
+    .filter(x=>x.trim() !== "");
+
+  let excelData = [];
+
+  rows.forEach((row,index)=>{
+
+    excelData.push({
+
+      No:index+1,
+      Text:row
+
+    });
 
   });
+
+  exportOCRExcel(excelData);
 
 }
 
@@ -484,6 +623,26 @@ async function scan(v){
       user:currentUser
 
     }
+  );
+
+}
+function exportOCRExcel(data){
+
+  const wb =
+    XLSX.utils.book_new();
+
+  const ws =
+    XLSX.utils.json_to_sheet(data);
+
+  XLSX.utils.book_append_sheet(
+    wb,
+    ws,
+    "OCR Result"
+  );
+
+  XLSX.writeFile(
+    wb,
+    "document_ocr.xlsx"
   );
 
 }
