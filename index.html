@@ -684,10 +684,6 @@ async function selectBackupDrive(){
 
   try{
 
-    /* --------------------------------------------------------
-       เลือก Drive / Folder
-    -------------------------------------------------------- */
-
     backupRootHandle =
       await window.showDirectoryPicker({
 
@@ -695,10 +691,6 @@ async function selectBackupDrive(){
 
       });
 
-
-    /* --------------------------------------------------------
-       Permission
-    -------------------------------------------------------- */
 
     const permission =
       await verifyPermission(
@@ -725,10 +717,6 @@ async function selectBackupDrive(){
     }
 
 
-    /* --------------------------------------------------------
-       เปิด / สร้าง Count stock
-    -------------------------------------------------------- */
-
     backupFolderHandle =
       await backupRootHandle
         .getDirectoryHandle(
@@ -744,8 +732,7 @@ async function selectBackupDrive(){
 
     setBackupStatus(
 
-      "✅ Backup พร้อมใช้งาน → " +
-      "C:\\Count stock",
+      "✅ Backup พร้อมใช้งาน → C:\\Count stock",
 
       "ok"
 
@@ -919,7 +906,7 @@ function getDisplayDateTime(){
 
 
 /* ============================================================
-   DAILY BACKUP FILE NAME
+   DAILY BACKUP FILE
 ============================================================ */
 
 function getDailyFileName(){
@@ -1079,10 +1066,7 @@ function createCSVRow(
 
 
 /* ============================================================
-   AUTO BACKUP CSV
-     
-   ใช้ FileHandle ใหม่ทุกครั้ง
-   เพื่อป้องกันปัญหา State Cached
+   AUTO BACKUP
 ============================================================ */
 
 async function backupScan(
@@ -1107,10 +1091,6 @@ async function backupScan(
 
 
   try{
-
-    /* --------------------------------------------------------
-       Permission
-    -------------------------------------------------------- */
 
     const permission =
       await verifyPermission(
@@ -1137,10 +1117,6 @@ async function backupScan(
     }
 
 
-    /* --------------------------------------------------------
-       Daily File
-    -------------------------------------------------------- */
-
     const fileName =
       getDailyFileName();
 
@@ -1150,9 +1126,9 @@ async function backupScan(
     let fileExists = true;
 
 
-    /* --------------------------------------------------------
-       หาไฟล์เดิม
-    -------------------------------------------------------- */
+    /* ========================================================
+       GET EXISTING FILE
+    ======================================================== */
 
     try{
 
@@ -1178,7 +1154,7 @@ async function backupScan(
 
 
     /* ========================================================
-       FILE EXISTS
+       EXISTING FILE
     ======================================================== */
 
     if(
@@ -1187,10 +1163,6 @@ async function backupScan(
       fileHandle
 
     ){
-
-      /* ------------------------------------------------------
-         อ่านข้อมูลเดิม
-      ------------------------------------------------------ */
 
       const file =
         await fileHandle.getFile();
@@ -1207,19 +1179,11 @@ async function backupScan(
         );
 
 
-      /* ------------------------------------------------------
-         New Row
-      ------------------------------------------------------ */
-
       const newRow =
         createCSVRow(
           scanData
         );
 
-
-      /* ------------------------------------------------------
-         ตรวจสอบ New Line
-      ------------------------------------------------------ */
 
       if(
 
@@ -1237,10 +1201,6 @@ async function backupScan(
       }
 
 
-      /* ------------------------------------------------------
-         รวมข้อมูล
-      ------------------------------------------------------ */
-
       const finalText =
 
         "\uFEFF" +
@@ -1251,10 +1211,6 @@ async function backupScan(
 
         "\r\n";
 
-
-      /* ------------------------------------------------------
-         สร้าง Writable ใหม่
-      ------------------------------------------------------ */
 
       const writable =
         await fileHandle
@@ -1271,9 +1227,7 @@ async function backupScan(
 
       setBackupStatus(
 
-        "✅ Backup ต่อไฟล์เดิมสำเร็จ → " +
-
-        "C:\\Count stock\\" +
+        "✅ Backup สำเร็จ → C:\\Count stock\\" +
 
         fileName,
 
@@ -1288,7 +1242,7 @@ async function backupScan(
 
 
     /* ========================================================
-       FILE NOT EXISTS
+       CREATE NEW DAILY FILE
     ======================================================== */
 
     else{
@@ -1336,9 +1290,7 @@ async function backupScan(
 
       setBackupStatus(
 
-        "✅ สร้างไฟล์ Backup วันนี้สำเร็จ → " +
-
-        "C:\\Count stock\\" +
+        "✅ สร้าง Backup วันนี้สำเร็จ → C:\\Count stock\\" +
 
         fileName,
 
@@ -1499,10 +1451,6 @@ async function scan(v){
     "none";
 
 
-  /* ----------------------------------------------------------
-     Empty
-  ---------------------------------------------------------- */
-
   if(
     !v ||
     !v.trim()
@@ -1519,9 +1467,9 @@ async function scan(v){
     v.trim();
 
 
-  /* ----------------------------------------------------------
-     Duplicate QR
-  ---------------------------------------------------------- */
+  /* ==========================================================
+     DUPLICATE QR
+  ========================================================== */
 
   if(
     scanned.includes(v)
@@ -1661,7 +1609,7 @@ async function scan(v){
 
 
   /* ==========================================================
-     CREATE SCAN DATA
+     CREATE DATA
   ========================================================== */
 
   const scanData = {
@@ -1709,7 +1657,7 @@ async function scan(v){
 
 
   /* ==========================================================
-     SAVE MEMORY
+     SAVE DATA
   ========================================================== */
 
   scanned.push(
@@ -1723,24 +1671,20 @@ async function scan(v){
 
 
   /* ==========================================================
-     RENDER PAGE
+     RENDER
   ========================================================== */
 
   render();
 
 
   /* ==========================================================
-     AUTO BACKUP
+     BACKUP
   ========================================================== */
 
   await backupScan(
     scanData
   );
 
-
-  /* ==========================================================
-     FOCUS
-  ========================================================== */
 
   qr.focus();
 
@@ -1868,10 +1812,6 @@ function render(){
   }
 
 
-  /* ==========================================================
-     SUMMARY
-  ========================================================== */
-
   renderSummary();
 
 }
@@ -1984,17 +1924,15 @@ function del(i){
 /* ============================================================
    SUMMARY
      
-   Group:
-     Row + Part
+   หน้าเว็บ:
      
-   Unit:
-     จำนวนครั้งที่ Scan
+   Part
+   Unit
+   Total Q'ty
      
-   Q'ty / Unit:
-     Q'ty ของ Part
+   Total Q'ty = Unit × Q'ty
      
-   Total Q'ty:
-     Unit × Q'ty
+   ไม่มี Q'ty / Unit แสดงบนหน้าเว็บ
 ============================================================ */
 
 function renderSummary(){
@@ -2035,10 +1973,7 @@ function renderSummary(){
           unit:
             0,
 
-          qtyPerUnit:
-            0,
-
-          totalQty:
+          qty:
             0
 
         };
@@ -2055,7 +1990,9 @@ function renderSummary(){
 
 
       /* ------------------------------------------------------
-         QTY / UNIT
+         TOTAL QTY
+         
+         Unit × Q'ty
       ------------------------------------------------------ */
 
       const currentQty =
@@ -2064,28 +2001,8 @@ function renderSummary(){
         ) || 0;
 
 
-      if(
-
-        summaryData[row][part]
-          .unit === 1
-
-      ){
-
-        summaryData[row][part]
-          .qtyPerUnit =
-          currentQty;
-
-      }
-
-
-      /* ------------------------------------------------------
-         TOTAL QTY
-         
-         Unit × Q'ty
-      ------------------------------------------------------ */
-
       summaryData[row][part]
-        .totalQty +=
+        .qty +=
         currentQty;
 
     }
@@ -2181,10 +2098,6 @@ function renderSummary(){
                 </th>
 
                 <th>
-                  Q'ty / Unit
-                </th>
-
-                <th>
                   Total Q'ty
                 </th>
 
@@ -2198,6 +2111,10 @@ function renderSummary(){
       `;
 
 
+      /* ======================================================
+         PARTS
+      ====================================================== */
+
       Object.keys(
         summaryData[r]
       )
@@ -2210,23 +2127,22 @@ function renderSummary(){
               .unit;
 
 
-          const qtyPerUnit =
+          const totalQty =
             summaryData[r][p]
-              .qtyPerUnit;
-
-
-          const total =
-            summaryData[r][p]
-              .totalQty;
+              .qty;
 
 
           totalUnit +=
             unit;
 
 
-          totalQty +=
-            total;
+          totalQty =
+            Number(totalQty) || 0;
 
+
+          /* --------------------------------------------------
+             HTML
+          -------------------------------------------------- */
 
           html += `
 
@@ -2251,28 +2167,28 @@ function renderSummary(){
               <td
                 style="
                   text-align:center;
-                "
-              >
-
-                ${qtyPerUnit}
-
-              </td>
-
-
-              <td
-                style="
-                  text-align:center;
                   font-weight:bold;
                 "
               >
 
-                ${total}
+                ${totalQty}
 
               </td>
 
             </tr>
 
           `;
+
+
+          /* --------------------------------------------------
+             Recalculate Total
+          -------------------------------------------------- */
+
+          totalQty =
+
+            Number(
+              summaryData[r][p].qty
+            ) || 0;
 
         }
       );
@@ -2281,6 +2197,26 @@ function renderSummary(){
       /* ======================================================
          TOTAL
       ====================================================== */
+
+      let rowTotalQty = 0;
+
+
+      Object.keys(
+        summaryData[r]
+      )
+
+      .forEach(
+        p => {
+
+          rowTotalQty +=
+
+            Number(
+              summaryData[r][p].qty
+            ) || 0;
+
+        }
+      );
+
 
       html += `
 
@@ -2292,7 +2228,11 @@ function renderSummary(){
               <tr>
 
                 <td>
-                  <b>TOTAL</b>
+
+                  <b>
+                    TOTAL
+                  </b>
+
                 </td>
 
 
@@ -2315,19 +2255,8 @@ function renderSummary(){
                   "
                 >
 
-                  -
-
-                </td>
-
-
-                <td
-                  style="
-                    text-align:center;
-                  "
-                >
-
                   <b>
-                    ${totalQty}
+                    ${rowTotalQty}
                   </b>
 
                 </td>
@@ -2457,10 +2386,6 @@ function clearAll(){
 
 function exportExcel(){
 
-  /* ==========================================================
-     CHECK DATA
-  ========================================================== */
-
   if(
     data.length === 0
   ){
@@ -2477,7 +2402,7 @@ function exportExcel(){
 
 
   /* ==========================================================
-     CREATE WORKBOOK
+     WORKBOOK
   ========================================================== */
 
   const wb =
@@ -2646,10 +2571,6 @@ function exportExcel(){
   ];
 
 
-  /* ==========================================================
-     APPEND RAW DATA
-  ========================================================== */
-
   XLSX.utils.book_append_sheet(
 
     wb,
@@ -2663,6 +2584,13 @@ function exportExcel(){
 
   /* ==========================================================
      SUMMARY DATA
+     
+     Excel ยังคงมี:
+     
+     Part
+     Unit
+     Q'ty / Unit
+     Total Q'ty
   ========================================================== */
 
   let summaryData = {};
@@ -2702,7 +2630,7 @@ function exportExcel(){
             0,
 
           qtyPerUnit:
-            0,
+            Number(x.qty) || 0,
 
           totalQty:
             0
@@ -2712,52 +2640,21 @@ function exportExcel(){
       }
 
 
-      /* ------------------------------------------------------
-         UNIT
-      ------------------------------------------------------ */
-
       summaryData[row][part]
         .unit++;
 
 
-      /* ------------------------------------------------------
-         QTY
-      ------------------------------------------------------ */
-
-      const currentQty =
-        Number(
-          x.qty
-        ) || 0;
-
-
-      if(
-
-        summaryData[row][part]
-          .unit === 1
-
-      ){
-
-        summaryData[row][part]
-          .qtyPerUnit =
-          currentQty;
-
-      }
-
-
-      /* ------------------------------------------------------
-         TOTAL QTY
-      ------------------------------------------------------ */
-
       summaryData[row][part]
         .totalQty +=
-        currentQty;
+
+        Number(x.qty) || 0;
 
     }
   );
 
 
   /* ==========================================================
-     BUILD SUMMARY
+     BUILD EXCEL SUMMARY
   ========================================================== */
 
   let summarySheet = [];
@@ -2835,7 +2732,7 @@ function exportExcel(){
 
 
       /* ======================================================
-         TOTAL ROW
+         TOTAL
       ====================================================== */
 
       summarySheet.push({
@@ -2862,7 +2759,7 @@ function exportExcel(){
 
 
   /* ==========================================================
-     SUMMARY WORKSHEET
+     SUMMARY SHEET
   ========================================================== */
 
   const ws2 =
@@ -2958,7 +2855,7 @@ function exportExcel(){
 
 
         /* ----------------------------------------------------
-           TOTAL ROW
+           TOTAL
         ---------------------------------------------------- */
 
         const partCell =
@@ -3033,7 +2930,7 @@ function exportExcel(){
 
 
   /* ==========================================================
-     SUMMARY COLUMN WIDTH
+     EXCEL COLUMN WIDTH
   ========================================================== */
 
   ws2["!cols"] = [
@@ -3069,86 +2966,31 @@ function exportExcel(){
       R++
     ){
 
-      /* ------------------------------------------------------
-         UNIT
-      ------------------------------------------------------ */
-
-      const unitCell =
-        ws2[
-          XLSX.utils.encode_cell({
-
-            r:R,
-
-            c:2
-
-          })
-        ];
-
-
-      if(unitCell){
-
-        unitCell.z =
-          "#,##0";
-
-      }
-
-
-      /* ------------------------------------------------------
-         QTY PER UNIT
-      ------------------------------------------------------ */
-
-      const qtyCell =
-        ws2[
-          XLSX.utils.encode_cell({
-
-            r:R,
-
-            c:3
-
-          })
-        ];
-
-
-      if(
-
-        qtyCell &&
-
-        typeof qtyCell.v === "number"
-
+      for(
+        let C = 2;
+        C <= 4;
+        C++
       ){
 
-        qtyCell.z =
-          "#,##0";
-
-      }
-
-
-      /* ------------------------------------------------------
-         TOTAL QTY
-      ------------------------------------------------------ */
-
-      const totalCell =
-        ws2[
+        const addr =
           XLSX.utils.encode_cell({
 
             r:R,
 
-            c:4
+            c:C
 
-          })
-        ];
+          });
 
 
-      if(
+        if(
+          ws2[addr] &&
+          typeof ws2[addr].v === "number"
+        ){
 
-        totalCell &&
+          ws2[addr].z =
+            "#,##0";
 
-        typeof totalCell.v === "number"
-
-      ){
-
-        totalCell.z =
-          "#,##0";
+        }
 
       }
 
@@ -3173,7 +3015,7 @@ function exportExcel(){
 
 
   /* ==========================================================
-     EXPORT FILE NAME
+     EXCEL FILE NAME
   ========================================================== */
 
   const fileName =
@@ -3188,7 +3030,7 @@ function exportExcel(){
 
 
   /* ==========================================================
-     DOWNLOAD EXCEL
+     WRITE FILE
   ========================================================== */
 
   XLSX.writeFile(
