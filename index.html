@@ -47,7 +47,7 @@ body{
 
 .container{
 
-  max-width:1300px;
+  max-width:1500px;
 
   margin:auto;
 
@@ -384,6 +384,7 @@ th{
 
   }
 
+
   .container{
 
     padding:15px;
@@ -434,7 +435,7 @@ th{
 
 <div id="duplicateAlert">
 
-  ⚠ ข้อมูลซ้ำ >> ไม่บันทึก << สแกนต่อได้เลย
+  ⚠ Duplicate QR Code
 
 </div>
 
@@ -504,6 +505,10 @@ th{
 
 <th>No</th>
 
+<th>Production Order</th>
+
+<th>Seq</th>
+
 <th>Line</th>
 
 <th>Location</th>
@@ -514,7 +519,7 @@ th{
 
 <th>PO</th>
 
-<th>LOT</th>
+<th>PO ITEM</th>
 
 <th>Remark</th>
 
@@ -680,7 +685,7 @@ async function selectBackupDrive(){
   try{
 
     /* --------------------------------------------------------
-       เลือก Drive C
+       เลือก Drive / Folder
     -------------------------------------------------------- */
 
     backupRootHandle =
@@ -692,7 +697,7 @@ async function selectBackupDrive(){
 
 
     /* --------------------------------------------------------
-       ตรวจสอบ Permission
+       Permission
     -------------------------------------------------------- */
 
     const permission =
@@ -722,8 +727,6 @@ async function selectBackupDrive(){
 
     /* --------------------------------------------------------
        เปิด / สร้าง Count stock
-       
-       ถ้ามีแล้วจะไม่สร้างใหม่
     -------------------------------------------------------- */
 
     backupFolderHandle =
@@ -741,7 +744,8 @@ async function selectBackupDrive(){
 
     setBackupStatus(
 
-      "✅ Backup พร้อมใช้งาน → C:\\Count stock",
+      "✅ Backup พร้อมใช้งาน → " +
+      "C:\\Count stock",
 
       "ok"
 
@@ -756,7 +760,7 @@ async function selectBackupDrive(){
 
       "C:\\Count stock\n\n" +
 
-      "ระบบจะบันทึกข้อมูลลงไฟล์ของวันนั้นต่อเนื่อง"
+      "ระบบจะบันทึกข้อมูลต่อเนื่องลงไฟล์ของวันนั้น"
 
     );
 
@@ -998,6 +1002,10 @@ function createCSVHeader(){
 
     "No",
 
+    "Production Order",
+
+    "Seq",
+
     "Line",
 
     "Location",
@@ -1008,7 +1016,7 @@ function createCSVHeader(){
 
     "PO",
 
-    "LOT",
+    "PO ITEM",
 
     "Remark",
 
@@ -1039,6 +1047,10 @@ function createCSVRow(
 
     x.no,
 
+    x.productionOrder,
+
+    x.seq,
+
     x.line,
 
     x.location,
@@ -1049,7 +1061,7 @@ function createCSVRow(
 
     x.po,
 
-    x.lot,
+    x.poItem,
 
     x.remark,
 
@@ -1069,13 +1081,8 @@ function createCSVRow(
 /* ============================================================
    AUTO BACKUP CSV
      
-   IMPORTANT:
-   ทุก Scan จะเปิด FileHandle ใหม่
-   ไม่ใช้ FileHandle เก่าค้างไว้
-     
-   ช่วยป้องกัน:
-   "An operation that depends on state cached
-    in an interface object..."
+   ใช้ FileHandle ใหม่ทุกครั้ง
+   เพื่อป้องกันปัญหา State Cached
 ============================================================ */
 
 async function backupScan(
@@ -1088,7 +1095,7 @@ async function backupScan(
 
     setBackupStatus(
 
-      "⚠ Scan สำเร็จ แต่ยังไม่ได้ตั้งค่า C:\\Count stock",
+      "⚠ Scan สำเร็จ แต่ยังไม่ได้ตั้งค่า Backup C:\\Count stock",
 
       "error"
 
@@ -1102,7 +1109,7 @@ async function backupScan(
   try{
 
     /* --------------------------------------------------------
-       ตรวจสอบ Permission
+       Permission
     -------------------------------------------------------- */
 
     const permission =
@@ -1131,10 +1138,7 @@ async function backupScan(
 
 
     /* --------------------------------------------------------
-       สร้างชื่อไฟล์วันนี้
-       
-       ตัวอย่าง:
-       Stock Counting_20260829.csv
+       Daily File
     -------------------------------------------------------- */
 
     const fileName =
@@ -1147,7 +1151,7 @@ async function backupScan(
 
 
     /* --------------------------------------------------------
-       เปิดไฟล์เดิม
+       หาไฟล์เดิม
     -------------------------------------------------------- */
 
     try{
@@ -1175,17 +1179,17 @@ async function backupScan(
 
     /* ========================================================
        FILE EXISTS
-       
-       เพิ่มข้อมูลต่อจากไฟล์เดิม
     ======================================================== */
 
     if(
+
       fileExists &&
       fileHandle
+
     ){
 
       /* ------------------------------------------------------
-         อ่านไฟล์ปัจจุบัน
+         อ่านข้อมูลเดิม
       ------------------------------------------------------ */
 
       const file =
@@ -1196,10 +1200,6 @@ async function backupScan(
         await file.text();
 
 
-      /* ------------------------------------------------------
-         ลบ BOM
-      ------------------------------------------------------ */
-
       oldText =
         oldText.replace(
           /^\uFEFF/,
@@ -1208,7 +1208,7 @@ async function backupScan(
 
 
       /* ------------------------------------------------------
-         สร้าง Row ใหม่
+         New Row
       ------------------------------------------------------ */
 
       const newRow =
@@ -1218,7 +1218,7 @@ async function backupScan(
 
 
       /* ------------------------------------------------------
-         ตรวจสอบท้ายไฟล์
+         ตรวจสอบ New Line
       ------------------------------------------------------ */
 
       if(
@@ -1238,7 +1238,7 @@ async function backupScan(
 
 
       /* ------------------------------------------------------
-         เพิ่มข้อมูล
+         รวมข้อมูล
       ------------------------------------------------------ */
 
       const finalText =
@@ -1253,7 +1253,7 @@ async function backupScan(
 
 
       /* ------------------------------------------------------
-         Writable ใหม่
+         สร้าง Writable ใหม่
       ------------------------------------------------------ */
 
       const writable =
@@ -1271,7 +1271,9 @@ async function backupScan(
 
       setBackupStatus(
 
-        "✅ Backup ต่อไฟล์เดิมสำเร็จ → C:\\Count stock\\" +
+        "✅ Backup ต่อไฟล์เดิมสำเร็จ → " +
+
+        "C:\\Count stock\\" +
 
         fileName,
 
@@ -1286,9 +1288,7 @@ async function backupScan(
 
 
     /* ========================================================
-       FILE ยังไม่มี
-       
-       สร้างครั้งแรกของวัน
+       FILE NOT EXISTS
     ======================================================== */
 
     else{
@@ -1336,7 +1336,9 @@ async function backupScan(
 
       setBackupStatus(
 
-        "✅ สร้าง Backup ไฟล์วันนี้สำเร็จ → C:\\Count stock\\" +
+        "✅ สร้างไฟล์ Backup วันนี้สำเร็จ → " +
+
+        "C:\\Count stock\\" +
 
         fileName,
 
@@ -1359,12 +1361,9 @@ async function backupScan(
     );
 
 
-    /* ========================================================
-       State Cache Error
-    ======================================================== */
-
     if(
 
+      error.message &&
       error.message.includes(
         "state cached"
       )
@@ -1548,15 +1547,18 @@ async function scan(v){
      
      Example:
      
-     200073618|T|QC FACT 1|1|VG79Y417H01|53|
-     2608c640e61d762c4fe1|9100003596|1930|
+     200073973|A|QC FACT 1|22|VG79N625H01|212|
+     2608323106aad848411f|9100003592|112|
      
+     d[0] = Production Order
      d[1] = Line
      d[2] = Location
+     d[3] = Seq
      d[4] = Part
      d[5] = Q'ty
+     d[6] = Reference
      d[7] = PO
-     d[8] = LOT
+     d[8] = PO ITEM
   ========================================================== */
 
   const d =
@@ -1571,12 +1573,20 @@ async function scan(v){
     row;
 
 
+  const productionOrder =
+    d[0] || "-";
+
+
   const line =
     d[1] || "-";
 
 
   const location =
     d[2] || "-";
+
+
+  const seq =
+    d[3] || "-";
 
 
   const part =
@@ -1594,7 +1604,7 @@ async function scan(v){
     d[7] || "-";
 
 
-  const lot =
+  const poItem =
     d[8] || "-";
 
 
@@ -1662,6 +1672,12 @@ async function scan(v){
     no:
       data.length + 1,
 
+    productionOrder:
+      productionOrder,
+
+    seq:
+      seq,
+
     line:
       line,
 
@@ -1677,8 +1693,8 @@ async function scan(v){
     po:
       po,
 
-    lot:
-      lot,
+    poItem:
+      poItem,
 
     remark:
       remark,
@@ -1693,10 +1709,13 @@ async function scan(v){
 
 
   /* ==========================================================
-     SAVE TO MEMORY
+     SAVE MEMORY
   ========================================================== */
 
-  scanned.push(v);
+  scanned.push(
+    v
+  );
+
 
   data.push(
     scanData
@@ -1704,7 +1723,7 @@ async function scan(v){
 
 
   /* ==========================================================
-     RENDER
+     RENDER PAGE
   ========================================================== */
 
   render();
@@ -1761,6 +1780,18 @@ function render(){
 
 
           <td>
+            ${escapeHtml(
+              x.productionOrder
+            )}
+          </td>
+
+
+          <td>
+            ${escapeHtml(x.seq)}
+          </td>
+
+
+          <td>
             ${escapeHtml(x.line)}
           </td>
 
@@ -1786,7 +1817,7 @@ function render(){
 
 
           <td>
-            ${escapeHtml(x.lot)}
+            ${escapeHtml(x.poItem)}
           </td>
 
 
@@ -1953,11 +1984,17 @@ function del(i){
 /* ============================================================
    SUMMARY
      
-   Unit = จำนวนครั้งที่ Scan
+   Group:
+     Row + Part
      
-   Q'ty / Unit = Q'ty จาก QR
+   Unit:
+     จำนวนครั้งที่ Scan
      
-   Total Q'ty = Unit × Q'ty
+   Q'ty / Unit:
+     Q'ty ของ Part
+     
+   Total Q'ty:
+     Unit × Q'ty
 ============================================================ */
 
 function renderSummary(){
@@ -2461,6 +2498,12 @@ function exportExcel(){
         No:
           i + 1,
 
+        "Production Order":
+          x.productionOrder,
+
+        Seq:
+          x.seq,
+
         Line:
           x.line,
 
@@ -2476,8 +2519,8 @@ function exportExcel(){
         PO:
           x.po,
 
-        LOT:
-          x.lot,
+        "PO ITEM":
+          x.poItem,
 
         Remark:
           x.remark,
@@ -2577,6 +2620,10 @@ function exportExcel(){
   ws1["!cols"] = [
 
     {wch:8},
+
+    {wch:8},
+
+    {wch:20},
 
     {wch:8},
 
@@ -2698,7 +2745,7 @@ function exportExcel(){
 
 
       /* ------------------------------------------------------
-         TOTAL
+         TOTAL QTY
       ------------------------------------------------------ */
 
       summaryData[row][part]
@@ -3126,7 +3173,7 @@ function exportExcel(){
 
 
   /* ==========================================================
-     FILE NAME
+     EXPORT FILE NAME
   ========================================================== */
 
   const fileName =
@@ -3141,7 +3188,7 @@ function exportExcel(){
 
 
   /* ==========================================================
-     DOWNLOAD
+     DOWNLOAD EXCEL
   ========================================================== */
 
   XLSX.writeFile(
@@ -3156,6 +3203,7 @@ function exportExcel(){
   setBackupStatus(
 
     "✅ Export Excel สำเร็จ → " +
+
     fileName,
 
     "ok"
