@@ -450,7 +450,7 @@ th{
 
 <button
   class="btn-orange"
-  onclick="exportExcelCompatibleCSV()"
+  onclick="exportCSV()"
 >
   📊 Export CSV
 </button>
@@ -460,7 +460,7 @@ th{
   class="btn-red"
   onclick="clearAll()"
 >
-  Clear
+  🗑 Clear
 </button>
 
 
@@ -470,7 +470,7 @@ th{
 
 <div id="backupStatus">
 
-  ⚠ ยังไม่ได้ตั้งค่า Backup Folder
+  ⚠ กรุณาตั้งค่า Backup Folder
 
 </div>
 
@@ -486,7 +486,6 @@ th{
 
 
 <thead>
-
 
 <tr>
 
@@ -513,7 +512,6 @@ th{
 <th>Action</th>
 
 </tr>
-
 
 </thead>
 
@@ -546,7 +544,7 @@ th{
 
 
 /* ============================================================
-   GLOBAL DATA
+   GLOBAL
 ============================================================ */
 
 let data = [];
@@ -557,7 +555,7 @@ let latestRowFocus = "";
 
 
 /* ============================================================
-   BACKUP SETTINGS
+   BACKUP
 ============================================================ */
 
 const BACKUP_FOLDER_NAME =
@@ -567,12 +565,6 @@ const BACKUP_FOLDER_NAME =
 const BACKUP_FILE_PREFIX =
   "Count stock";
 
-
-/*
-   File System Access API
-
-   ใช้สำหรับเขียนไฟล์ลง C:\
-*/
 
 let backupRootHandle = null;
 
@@ -614,9 +606,7 @@ for(
   rowSelect.innerHTML += `
 
     <option value="${i}">
-
       Row ${i}
-
     </option>
 
   `;
@@ -625,7 +615,7 @@ for(
 
 
 /* ============================================================
-   CHECK BROWSER SUPPORT
+   BROWSER SUPPORT
 ============================================================ */
 
 function isBackupSupported(){
@@ -638,7 +628,7 @@ function isBackupSupported(){
 
 
 /* ============================================================
-   BACKUP STATUS
+   STATUS
 ============================================================ */
 
 function setBackupStatus(
@@ -656,13 +646,7 @@ function setBackupStatus(
 
 
 /* ============================================================
-   SELECT C:\ DRIVE
-     
-   ผู้ใช้เลือก C:\ เพียงครั้งแรก
-     
-   จากนั้นสร้าง:
-     
-   C:\Count stock
+   SELECT C:
 ============================================================ */
 
 async function selectBackupDrive(){
@@ -673,9 +657,9 @@ async function selectBackupDrive(){
 
     alert(
 
-      "Browser นี้ไม่รองรับการเขียนไฟล์ลง C:\\ โดยตรง\n\n" +
+      "Browser นี้ไม่รองรับการเขียนไฟล์ลง C:\\\n\n" +
 
-      "กรุณาใช้ Microsoft Edge หรือ Google Chrome รุ่นใหม่"
+      "กรุณาใช้ Google Chrome หรือ Microsoft Edge รุ่นใหม่"
 
     );
 
@@ -687,7 +671,7 @@ async function selectBackupDrive(){
   try{
 
     /*
-       เปิดหน้าต่างเลือก Folder
+       ให้ผู้ใช้เลือก C:\
     */
 
     backupRootHandle =
@@ -699,7 +683,7 @@ async function selectBackupDrive(){
 
 
     /*
-       ตรวจสอบ Permission
+       ขอสิทธิ์เขียน
     */
 
     const permission =
@@ -728,9 +712,7 @@ async function selectBackupDrive(){
 
 
     /*
-       สร้าง / เปิด Count stock
-       
-       ถ้ามีอยู่แล้วจะไม่สร้างซ้ำ
+       เปิด / สร้าง Count stock
     */
 
     backupFolderHandle =
@@ -755,25 +737,11 @@ async function selectBackupDrive(){
     );
 
 
-    /*
-       ถ้ามีข้อมูลอยู่แล้ว
-       Backup ทันที
-    */
-
-    if(
-      data.length > 0
-    ){
-
-      await createBackupCSV();
-
-    }
-
-
     alert(
 
       "ตั้งค่า Backup สำเร็จ\n\n" +
 
-      "โฟลเดอร์:\n" +
+      "ระบบจะบันทึกข้อมูลรายวันใน\n" +
 
       "C:\\Count stock"
 
@@ -782,14 +750,10 @@ async function selectBackupDrive(){
 
     qr.focus();
 
-
   }
   catch(error){
 
-    console.error(
-      "Backup folder error:",
-      error
-    );
+    console.error(error);
 
 
     setBackupStatus(
@@ -806,7 +770,7 @@ async function selectBackupDrive(){
 
 
 /* ============================================================
-   VERIFY PERMISSION
+   PERMISSION
 ============================================================ */
 
 async function verifyPermission(
@@ -858,10 +822,7 @@ async function verifyPermission(
   }
   catch(error){
 
-    console.error(
-      "Permission error:",
-      error
-    );
+    console.error(error);
 
     return false;
 
@@ -874,6 +835,9 @@ async function verifyPermission(
    DATE
      
    YYYYMMDD
+     
+   ตัวอย่าง:
+   20260829
 ============================================================ */
 
 function getDateString(){
@@ -907,9 +871,7 @@ function getDateString(){
   return (
 
     year +
-
     month +
-
     day
 
   );
@@ -918,71 +880,28 @@ function getDateString(){
 
 
 /* ============================================================
-   TIME
-     
-   HHMMSS
+   DISPLAY DATE TIME
 ============================================================ */
 
-function getTimeString(){
+function getDisplayDateTime(){
 
-  const now =
-    new Date();
-
-
-  const hour =
-    String(
-      now.getHours()
-    ).padStart(
-      2,
-      "0"
-    );
-
-
-  const minute =
-    String(
-      now.getMinutes()
-    ).padStart(
-      2,
-      "0"
-    );
-
-
-  const second =
-    String(
-      now.getSeconds()
-    ).padStart(
-      2,
-      "0"
-    );
-
-
-  return (
-
-    hour +
-
-    minute +
-
-    second
-
-  );
+  return new Date()
+    .toLocaleString();
 
 }
 
 
 /* ============================================================
-   UNIQUE FILE NAME
+   DAILY FILE NAME
      
-   Count stock_20260829_070501.csv
+   ไม่มีเวลา
      
-   ถ้าซ้ำ:
-     
-   Count stock_20260829_070501 (1).csv
-   Count stock_20260829_070501 (2).csv
+   Count stock_20260829.csv
 ============================================================ */
 
-async function getUniqueFileName(){
+function getDailyFileName(){
 
-  const baseName =
+  return (
 
     BACKUP_FILE_PREFIX +
 
@@ -990,73 +909,9 @@ async function getUniqueFileName(){
 
     getDateString() +
 
-    "_" +
+    ".csv"
 
-    getTimeString();
-
-
-  let fileName =
-    baseName +
-    ".csv";
-
-
-  let counter = 1;
-
-
-  while(true){
-
-    try{
-
-      /*
-         ถ้ามีไฟล์อยู่
-         getFileHandle จะหาเจอ
-      */
-
-      await backupFolderHandle
-        .getFileHandle(
-
-          fileName,
-
-          {
-            create:false
-          }
-
-        );
-
-
-      /*
-         ไฟล์ซ้ำ
-      */
-
-      fileName =
-
-        baseName +
-
-        " (" +
-
-        counter +
-
-        ")" +
-
-        ".csv";
-
-
-      counter++;
-
-
-    }
-    catch(error){
-
-      /*
-         ไม่พบไฟล์
-         ใช้ชื่อปัจจุบัน
-      */
-
-      return fileName;
-
-    }
-
-  }
+  );
 
 }
 
@@ -1081,14 +936,6 @@ function csvEscape(value){
     String(value);
 
 
-  /*
-     CSV ต้อง escape:
-     
-     "
-     ,
-     newline
-  */
-
   text =
     text.replace(
       /"/g,
@@ -1097,10 +944,15 @@ function csvEscape(value){
 
 
   if(
+
     text.includes(",") ||
+
     text.includes('"') ||
+
     text.includes("\n") ||
+
     text.includes("\r")
+
   ){
 
     return '"' +
@@ -1116,23 +968,53 @@ function csvEscape(value){
 
 
 /* ============================================================
-   CREATE CSV CONTENT
+   CREATE CSV ROW
      
-   UTF-8 BOM
-     
-   เปิด Excel ภาษาไทยได้ถูกต้อง
+   1 Scan = 1 Row
 ============================================================ */
 
-function createCSVContent(){
+function createCSVRow(
+  x
+){
 
-  let rows = [];
+  return [
+
+    x.row,
+
+    x.no,
+
+    x.line,
+
+    x.location,
+
+    x.part,
+
+    Number(x.qty) || 0,
+
+    x.po,
+
+    x.lot,
+
+    x.remark,
+
+    x.time
+
+  ]
+
+  .map(csvEscape)
+
+  .join(",");
+
+}
 
 
-  /* ==========================================================
-     HEADER
-  ========================================================== */
+/* ============================================================
+   CREATE CSV HEADER
+============================================================ */
 
-  rows.push([
+function createCSVHeader(){
+
+  return [
 
     "Row",
 
@@ -1154,83 +1036,33 @@ function createCSVContent(){
 
     "Time"
 
-  ]);
+  ]
 
+  .map(csvEscape)
 
-  /* ==========================================================
-     DATA
-  ========================================================== */
-
-  data.forEach(
-    (x,i) => {
-
-      rows.push([
-
-        x.row,
-
-        i + 1,
-
-        x.line,
-
-        x.location,
-
-        x.part,
-
-        Number(x.qty) || 0,
-
-        x.po,
-
-        x.lot,
-
-        x.remark,
-
-        x.time
-
-      ]);
-
-    }
-  );
-
-
-  /*
-     แปลงเป็น CSV
-  */
-
-  const csv =
-    rows
-      .map(
-        row =>
-          row
-            .map(csvEscape)
-            .join(",")
-      )
-      .join("\r\n");
-
-
-  /*
-     UTF-8 BOM
-     
-     ช่วยให้ Excel อ่านภาษาไทย
-  */
-
-  return "\uFEFF" + csv;
+  .join(",");
 
 }
 
 
 /* ============================================================
-   CREATE BACKUP CSV
+   BACKUP ONE SCAN
      
-   Backup ทุกครั้งที่ Scan
+   สำคัญ:
+     
+   ระบบจะเปิดไฟล์ของ "วันนี้"
+     
+   ถ้ามีไฟล์:
+       อ่านข้อมูลเดิม
+       แล้วเพิ่มข้อมูลใหม่ต่อท้าย
+     
+   ถ้าไม่มี:
+       สร้างไฟล์ใหม่
 ============================================================ */
 
-async function createBackupCSV(){
-
-  /*
-     ถ้ายังไม่ได้เลือก C:
-     
-     ไม่สามารถเขียนไฟล์ได้
-  */
+async function backupScan(
+  scanData
+){
 
   if(
     !backupFolderHandle
@@ -1252,7 +1084,7 @@ async function createBackupCSV(){
   try{
 
     /*
-       ตรวจสอบ Permission
+       ตรวจ Permission
     */
 
     const permission =
@@ -1269,7 +1101,7 @@ async function createBackupCSV(){
 
       setBackupStatus(
 
-        "❌ ไม่มีสิทธิ์เขียนไฟล์ Backup",
+        "❌ ไม่มีสิทธิ์เขียน Backup",
 
         "error"
 
@@ -1281,53 +1113,171 @@ async function createBackupCSV(){
 
 
     /*
-       สร้างชื่อไฟล์
+       ชื่อไฟล์รายวัน
     */
 
     const fileName =
-      await getUniqueFileName();
+      getDailyFileName();
 
 
     /*
-       CSV
+       ตรวจว่าไฟล์วันนี้มีหรือยัง
     */
 
-    const csv =
-      createCSVContent();
+    let fileHandle;
+
+    let fileExists = true;
+
+
+    try{
+
+      fileHandle =
+        await backupFolderHandle
+          .getFileHandle(
+
+            fileName,
+
+            {
+              create:false
+            }
+
+          );
+
+    }
+    catch(error){
+
+      fileExists = false;
+
+    }
 
 
     /*
-       สร้างไฟล์
+       ========================================================
+       กรณีมีไฟล์อยู่แล้ว
+       ========================================================
     */
 
-    const fileHandle =
-      await backupFolderHandle
-        .getFileHandle(
+    if(fileExists){
 
-          fileName,
+      const file =
+        await fileHandle
+          .getFile();
 
-          {
-            create:true
-          }
 
+      /*
+         อ่านข้อมูลเดิม
+      */
+
+      const oldText =
+        await file.text();
+
+
+      /*
+         สร้าง Row ใหม่
+      */
+
+      const newRow =
+        createCSVRow(
+          scanData
         );
 
 
+      /*
+         ถ้ามีข้อมูลอยู่แล้ว
+         ให้เพิ่มต่อท้าย
+      */
+
+      let finalText =
+        oldText;
+
+
+      if(
+        !finalText.endsWith("\n") &&
+        finalText.length > 0
+      ){
+
+        finalText += "\r\n";
+
+      }
+
+
+      finalText +=
+        newRow +
+        "\r\n";
+
+
+      /*
+         เขียนกลับทั้งไฟล์
+      */
+
+      const writable =
+        await fileHandle
+          .createWritable();
+
+
+      await writable.write(
+        "\uFEFF" +
+        finalText.replace(
+          /^\uFEFF/,
+          ""
+        )
+      );
+
+
+      await writable.close();
+
+    }
+
+
     /*
-       เขียนไฟล์
+       ========================================================
+       กรณียังไม่มีไฟล์
+       ========================================================
     */
 
-    const writable =
-      await fileHandle
-        .createWritable();
+    else{
+
+      fileHandle =
+        await backupFolderHandle
+          .getFileHandle(
+
+            fileName,
+
+            {
+              create:true
+            }
+
+          );
 
 
-    await writable.write(
-      csv
-    );
+      const csvText =
+
+        "\uFEFF" +
+
+        createCSVHeader() +
+
+        "\r\n" +
+
+        createCSVRow(
+          scanData
+        ) +
+
+        "\r\n";
 
 
-    await writable.close();
+      const writable =
+        await fileHandle
+          .createWritable();
+
+
+      await writable.write(
+        csvText
+      );
+
+
+      await writable.close();
+
+    }
 
 
     /*
@@ -1336,7 +1286,8 @@ async function createBackupCSV(){
 
     setBackupStatus(
 
-      "✅ Backup สำเร็จ: " +
+      "✅ Backup สำเร็จ → " +
+      "C:\\Count stock\\" +
       fileName,
 
       "ok"
@@ -1350,7 +1301,7 @@ async function createBackupCSV(){
   catch(error){
 
     console.error(
-      "CSV Backup Error:",
+      "Backup error:",
       error
     );
 
@@ -1374,6 +1325,13 @@ async function createBackupCSV(){
 
 /* ============================================================
    MANUAL BACKUP
+     
+   Manual Backup จะสร้าง/อัปเดตไฟล์รายวัน
+     
+   แต่จะไม่เพิ่มข้อมูลซ้ำ
+   เพราะข้อมูลทั้งหมดถูก Backup ตอน Scan แล้ว
+     
+   จึงใช้สำหรับตรวจสอบสถานะ
 ============================================================ */
 
 async function manualBackup(){
@@ -1397,11 +1355,11 @@ async function manualBackup(){
 
     alert(
 
-      "กรุณาตั้งค่า Backup ก่อน\n\n" +
+      "กรุณากด\n" +
 
-      "กดปุ่ม:\n" +
+      "📁 ตั้งค่า C:\\Count stock\n\n" +
 
-      "📁 ตั้งค่า C:\\Count stock"
+      "ก่อนใช้งาน Backup"
 
     );
 
@@ -1410,7 +1368,26 @@ async function manualBackup(){
   }
 
 
-  await createBackupCSV();
+  /*
+     Manual Backup:
+     สร้าง Snapshot ของข้อมูลปัจจุบัน
+     
+     ใช้ชื่อไฟล์แยกไม่ได้
+     เพราะต้องการรายวัน
+     
+     ดังนั้นจะแจ้งว่า
+     Backup ถูกทำอัตโนมัติทุก Scan
+  */
+
+  alert(
+
+    "ข้อมูลถูก Backup อัตโนมัติทุกครั้งที่ Scan แล้ว\n\n" +
+
+    "ไฟล์วันนี้:\n" +
+
+    getDailyFileName()
+
+  );
 
 }
 
@@ -1446,14 +1423,10 @@ qr.addEventListener(
 
 
 /* ============================================================
-   SCAN
+   SCAN FUNCTION
 ============================================================ */
 
 async function scan(v){
-
-  /*
-     ปิด Alert
-  */
 
   document
     .getElementById(
@@ -1507,7 +1480,7 @@ async function scan(v){
 
 
   /* ==========================================================
-     SAVE SCANNED QR
+     SAVE QR
   ========================================================== */
 
   scanned.push(v);
@@ -1562,32 +1535,20 @@ async function scan(v){
 
 
   /* ==========================================================
-     LINE
+     DATA
   ========================================================== */
 
   const line =
     d[1] || "-";
 
 
-  /* ==========================================================
-     LOCATION
-  ========================================================== */
-
   const location =
     d[2] || "-";
 
 
-  /* ==========================================================
-     PART
-  ========================================================== */
-
   const part =
     d[4] || "-";
 
-
-  /* ==========================================================
-     Q'TY
-  ========================================================== */
 
   const qty =
     parseInt(
@@ -1596,29 +1557,16 @@ async function scan(v){
     ) || 0;
 
 
-  /* ==========================================================
-     PO
-  ========================================================== */
-
   const po =
     d[7] || "-";
 
-
-  /* ==========================================================
-     LOT
-  ========================================================== */
 
   const lot =
     d[8] || "-";
 
 
-  /* ==========================================================
-     TIME
-  ========================================================== */
-
   const time =
-    new Date()
-      .toLocaleString();
+    getDisplayDateTime();
 
 
   /* ==========================================================
@@ -1670,12 +1618,15 @@ async function scan(v){
 
 
   /* ==========================================================
-     SAVE DATA
+     CREATE SCAN DATA
   ========================================================== */
 
-  data.push({
+  const scanData = {
 
     row: row,
+
+    no:
+      data.length + 1,
 
     line: line,
 
@@ -1695,11 +1646,20 @@ async function scan(v){
 
     key: v
 
-  });
+  };
 
 
   /* ==========================================================
-     RENDER PAGE
+     SAVE TO MEMORY
+  ========================================================== */
+
+  data.push(
+    scanData
+  );
+
+
+  /* ==========================================================
+     RENDER
   ========================================================== */
 
   render();
@@ -1708,13 +1668,13 @@ async function scan(v){
   /* ==========================================================
      AUTO BACKUP
      
-     สำคัญ:
-     
-     ทุกครั้งที่ Scan สำเร็จ
-     จะสร้าง CSV ใหม่ทันที
-  ========================================================== */
+     ทุก Scan สำเร็จ
+     → เพิ่มลงไฟล์รายวัน
+============================================================ */
 
-  await createBackupCSV();
+  await backupScan(
+    scanData
+  );
 
 
   /* ==========================================================
@@ -1892,6 +1852,13 @@ function escapeHtml(value){
 
 /* ============================================================
    DELETE
+     
+   Delete หน้าเว็บ
+     
+   หลัง Delete จะ Backup Snapshot ไม่ได้เพิ่มซ้ำ
+   เพราะไฟล์รายวันเป็น Audit Log ของการ Scan
+     
+   ดังนั้น Backup จะยังเก็บข้อมูลที่เคย Scan ไว้
 ============================================================ */
 
 async function del(i){
@@ -1906,22 +1873,24 @@ async function del(i){
   }
 
 
-  const confirmDelete =
+  const confirmed =
     confirm(
-      "ต้องการลบรายการนี้หรือไม่?"
+
+      "⚠ ต้องการลบรายการนี้หรือไม่?\n\n" +
+
+      "ข้อมูลจะถูกลบออกจากหน้าเว็บ\n" +
+
+      "แต่ข้อมูล Backup CSV ที่เคยบันทึกแล้วจะไม่ถูกลบ"
+
     );
 
 
-  if(!confirmDelete){
+  if(!confirmed){
 
     return;
 
   }
 
-
-  /*
-     เอา QR ออกจาก scanned
-  */
 
   scanned =
     scanned.filter(
@@ -1930,34 +1899,13 @@ async function del(i){
     );
 
 
-  /*
-     ลบข้อมูล
-  */
-
   data.splice(
     i,
     1
   );
 
 
-  /*
-     Render
-  */
-
   render();
-
-
-  /*
-     Backup สถานะล่าสุด
-  */
-
-  if(
-    backupFolderHandle
-  ){
-
-    await createBackupCSV();
-
-  }
 
 
   qr.focus();
@@ -1968,45 +1916,29 @@ async function del(i){
 /* ============================================================
    SUMMARY
      
-     Group:
-       Row + Part
+     Unit = จำนวนครั้งที่ Scan
      
-     Unit:
-       จำนวนครั้งที่ Scan
+     Q'ty / Unit = Q'ty จาก QR
      
-     Q'ty:
-       Unit × Q'ty ต่อ 1 Scan
+     Total Q'ty = ผลรวม Q'ty
      
-     ตัวอย่าง:
+     ถ้า Q'ty เท่ากัน:
      
-       Scan 1:
-         Q'ty = 53
+       Unit × Q'ty
      
-       Scan 2:
-         Q'ty = 53
-     
-       Scan 3:
-         Q'ty = 53
+     เช่น:
      
        Unit = 3
-     
-       Summary Q'ty:
-         3 × 53 = 159
-     
-     หากแต่ละ Scan Q'ty ไม่เท่ากัน
-     จะรวมตามจำนวนจริง:
-     
-       53 + 100 + 20 = 173
+       Q'ty = 53
+       
+       Total = 3 × 53
+             = 159
 ============================================================ */
 
 function renderSummary(){
 
   let summaryData = {};
 
-
-  /* ==========================================================
-     GROUP
-  ========================================================== */
 
   data.forEach(
     x => {
@@ -2058,10 +1990,7 @@ function renderSummary(){
 
 
       /* ------------------------------------------------------
-         Q'TY ต่อ Unit
-         
-         ถ้า Scan แรก Q'ty = 53
-         เก็บไว้เป็น 53
+         QTY
       ------------------------------------------------------ */
 
       const currentQty =
@@ -2069,8 +1998,7 @@ function renderSummary(){
 
 
       /*
-         ถ้าเป็น Scan แรก
-         กำหนด Qty ต่อ Unit
+         เก็บ Q'ty ของ Scan แรก
       */
 
       if(
@@ -2085,14 +2013,15 @@ function renderSummary(){
       }
 
 
-      /* ------------------------------------------------------
-         TOTAL QTY
+      /*
+         Total Q'ty
+         
+         = รวม Q'ty ทุก Scan
+         
+         ถ้า Q'ty เท่ากัน:
          
          Unit × Q'ty
-         
-         ถ้าแต่ละ Scan Q'ty เท่ากัน
-         จะเท่ากับ Unit × Q'ty
-      ------------------------------------------------------ */
+      */
 
       summaryData[row][part]
         .totalQty +=
@@ -2125,7 +2054,7 @@ function renderSummary(){
 
 
   /* ==========================================================
-     HTML
+     BUILD HTML
   ========================================================== */
 
   let html = "";
@@ -2210,7 +2139,7 @@ function renderSummary(){
 
 
       /* ======================================================
-         PARTS
+         PART
       ====================================================== */
 
       Object.keys(
@@ -2229,10 +2158,6 @@ function renderSummary(){
             summaryData[r][p]
               .qtyPerUnit;
 
-
-          /*
-             Total Qty
-          */
 
           const totalQtyPart =
             summaryData[r][p]
@@ -2261,7 +2186,9 @@ function renderSummary(){
                   text-align:center;
                 "
               >
+
                 ${unit}
+
               </td>
 
 
@@ -2270,7 +2197,9 @@ function renderSummary(){
                   text-align:center;
                 "
               >
+
                 ${qtyPerUnit}
+
               </td>
 
 
@@ -2280,7 +2209,9 @@ function renderSummary(){
                   font-weight:bold;
                 "
               >
+
                 ${totalQtyPart}
+
               </td>
 
             </tr>
@@ -2314,9 +2245,11 @@ function renderSummary(){
                     text-align:center;
                   "
                 >
+
                   <b>
                     ${totalUnit}
                   </b>
+
                 </td>
 
 
@@ -2325,7 +2258,9 @@ function renderSummary(){
                     text-align:center;
                   "
                 >
+
                   -
+
                 </td>
 
 
@@ -2334,9 +2269,11 @@ function renderSummary(){
                     text-align:center;
                   "
                 >
+
                   <b>
                     ${totalQty}
                   </b>
+
                 </td>
 
               </tr>
@@ -2355,10 +2292,6 @@ function renderSummary(){
   );
 
 
-  /* ==========================================================
-     DISPLAY
-  ========================================================== */
-
   document
     .getElementById(
       "summary"
@@ -2372,31 +2305,51 @@ function renderSummary(){
 /* ============================================================
    CLEAR
      
-   IMPORTANT:
+   มี Pop-up ยืนยัน
      
-   Clear หน้าเว็บเท่านั้น
-     
-   ไม่ลบ Backup CSV
+   ข้อมูล Backup CSV ไม่ถูกลบ
 ============================================================ */
 
 function clearAll(){
 
-  const confirmClear =
+  /*
+     POP-UP ยืนยัน
+  */
+
+  const confirmed =
     confirm(
 
-      "ต้องการ Clear ข้อมูลบนหน้าเว็บหรือไม่?\n\n" +
+      "⚠️ ยืนยันการลบข้อมูล\n\n" +
 
-      "ไฟล์ Backup CSV เดิมจะไม่ถูกลบ"
+      "คุณต้องการลบข้อมูลทั้งหมดบนหน้าเว็บจริงหรือไม่?\n\n" +
+
+      "หมายเหตุ:\n" +
+
+      "• ข้อมูลที่แสดงบนหน้าเว็บจะถูกลบ\n" +
+
+      "• ข้อมูล Backup ใน C:\\Count stock จะไม่ถูกลบ\n" +
+
+      "• ไฟล์ CSV รายวันจะยังคงอยู่"
 
     );
 
 
-  if(!confirmClear){
+  /*
+     ถ้ากด Cancel
+  */
+
+  if(!confirmed){
+
+    qr.focus();
 
     return;
 
   }
 
+
+  /*
+     Clear Memory
+  */
 
   data = [];
 
@@ -2405,9 +2358,17 @@ function clearAll(){
   latestRowFocus = "";
 
 
+  /*
+     Clear Table
+  */
+
   tb.innerHTML =
     "";
 
+
+  /*
+     Clear Summary
+  */
 
   document
     .getElementById(
@@ -2417,6 +2378,10 @@ function clearAll(){
     "";
 
 
+  /*
+     Clear Duplicate Alert
+  */
+
   document
     .getElementById(
       "duplicateAlert"
@@ -2425,9 +2390,13 @@ function clearAll(){
     "none";
 
 
+  /*
+     Status
+  */
+
   setBackupStatus(
 
-    "⚠ Clear หน้าเว็บแล้ว — Backup CSV เดิมยังอยู่",
+    "✅ Clear สำเร็จ — Backup CSV เดิมยังอยู่",
 
     "ok"
 
@@ -2442,12 +2411,10 @@ function clearAll(){
 /* ============================================================
    EXPORT CSV
      
-     ดาวน์โหลด CSV ผ่าน Browser
-     
-     ใช้เมื่อผู้ใช้ต้องการ Export
+   Export ข้อมูลที่อยู่หน้าเว็บ
 ============================================================ */
 
-function exportExcelCompatibleCSV(){
+function exportCSV(){
 
   if(
     data.length === 0
@@ -2462,8 +2429,86 @@ function exportExcelCompatibleCSV(){
   }
 
 
+  let rows = [];
+
+
+  rows.push(
+
+    [
+
+      "Row",
+
+      "No",
+
+      "Line",
+
+      "Location",
+
+      "Part",
+
+      "Q'ty",
+
+      "PO",
+
+      "LOT",
+
+      "Remark",
+
+      "Time"
+
+    ]
+
+    .map(csvEscape)
+
+    .join(",")
+
+  );
+
+
+  data.forEach(
+    (x,i) => {
+
+      rows.push(
+
+        [
+
+          x.row,
+
+          i + 1,
+
+          x.line,
+
+          x.location,
+
+          x.part,
+
+          Number(x.qty) || 0,
+
+          x.po,
+
+          x.lot,
+
+          x.remark,
+
+          x.time
+
+        ]
+
+        .map(csvEscape)
+
+        .join(",")
+
+      );
+
+    }
+  );
+
+
   const csv =
-    createCSVContent();
+
+    "\uFEFF" +
+
+    rows.join("\r\n");
 
 
   const blob =
@@ -2503,29 +2548,31 @@ function exportExcelCompatibleCSV(){
 
     getDateString() +
 
-    "_" +
-
-    getTimeString() +
-
-    ".csv";
+    "_Export.csv";
 
 
-  document.body.appendChild(a);
+  document.body.appendChild(
+    a
+  );
 
 
   a.click();
 
 
-  document.body.removeChild(a);
+  document.body.removeChild(
+    a
+  );
 
 
-  URL.revokeObjectURL(url);
+  URL.revokeObjectURL(
+    url
+  );
 
 }
 
 
 /* ============================================================
-   INITIAL
+   INITIAL STATUS
 ============================================================ */
 
 if(
@@ -2545,7 +2592,7 @@ else{
 
   setBackupStatus(
 
-    "⚠ กรุณากด 'ตั้งค่า C:\\Count stock' ครั้งแรก",
+    "⚠ กรุณากด 'ตั้งค่า C:\\Count stock' ก่อนเริ่ม Scan",
 
     ""
 
