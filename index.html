@@ -13,6 +13,13 @@
 <title>INVENTORY COUNTING SYSTEM</title>
 
 
+<!-- ============================================================
+     EXCEL LIBRARY
+============================================================ -->
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+
+
 <style>
 
 /* ============================================================
@@ -450,9 +457,9 @@ th{
 
 <button
   class="btn-orange"
-  onclick="exportCSV()"
+  onclick="exportExcel()"
 >
-  📊 Export CSV
+  📊 Export Excel
 </button>
 
 
@@ -645,18 +652,6 @@ function setBackupStatus(
 
 /* ============================================================
    SELECT BACKUP DRIVE
-     
-   ผู้ใช้เลือก C:\
-     
-   ระบบจะเข้าไปใช้:
-     
-   C:\Count stock
-     
-   ถ้ามีอยู่แล้ว:
-     ใช้ของเดิม
-     
-   ถ้ายังไม่มี:
-     สร้างครั้งเดียว
 ============================================================ */
 
 async function selectBackupDrive(){
@@ -680,10 +675,6 @@ async function selectBackupDrive(){
 
   try{
 
-    /*
-       เลือก C:\
-    */
-
     backupRootHandle =
       await window.showDirectoryPicker({
 
@@ -691,10 +682,6 @@ async function selectBackupDrive(){
 
       });
 
-
-    /*
-       ตรวจสิทธิ์
-    */
 
     const permission =
       await verifyPermission(
@@ -720,20 +707,6 @@ async function selectBackupDrive(){
 
     }
 
-
-    /*
-       ========================================================
-       สำคัญ
-       
-       getDirectoryHandle(create:true)
-       
-       ถ้า Count stock มีอยู่แล้ว
-       จะเปิดโฟลเดอร์เดิม
-       
-       ถ้ายังไม่มี
-       จะสร้างแค่ครั้งเดียว
-       ========================================================
-    */
 
     backupFolderHandle =
       await backupRootHandle
@@ -860,13 +833,7 @@ async function verifyPermission(
 
 
 /* ============================================================
-   DATE
-     
-   YYYYMMDD
-     
-   Example:
-     
-   20260829
+   DATE YYYYMMDD
 ============================================================ */
 
 function getDateString(){
@@ -921,11 +888,7 @@ function getDisplayDateTime(){
 
 
 /* ============================================================
-   DAILY FILE NAME
-     
-   ตัวอย่าง:
-     
-   Stock Counting_20260829.csv
+   DAILY BACKUP FILE NAME
 ============================================================ */
 
 function getDailyFileName(){
@@ -1077,22 +1040,7 @@ function createCSVRow(
 
 
 /* ============================================================
-   AUTO BACKUP
-     
-   หลักการ:
-     
-   1. ใช้โฟลเดอร์ C:\Count stock เดิม
-     
-   2. ตรวจไฟล์วันนี้
-     
-   3. ถ้ามี:
-        อ่านไฟล์เดิม
-        เพิ่มข้อมูลต่อท้าย
-     
-   4. ถ้าไม่มี:
-        สร้างไฟล์ใหม่
-     
-   5. ไม่มีการสร้างไฟล์ซ้ำในวันเดียวกัน
+   AUTO BACKUP CSV
 ============================================================ */
 
 async function backupScan(
@@ -1117,10 +1065,6 @@ async function backupScan(
 
 
   try{
-
-    /*
-       ตรวจ Permission
-    */
 
     const permission =
       await verifyPermission(
@@ -1147,27 +1091,14 @@ async function backupScan(
     }
 
 
-    /*
-       ========================================================
-       ชื่อไฟล์ของวันนี้
-       ========================================================
-    */
-
     const fileName =
       getDailyFileName();
 
 
     let fileHandle;
 
-
     let exists = true;
 
-
-    /*
-       ========================================================
-       ตรวจไฟล์
-       ========================================================
-    */
 
     try{
 
@@ -1197,10 +1128,6 @@ async function backupScan(
 
     if(exists){
 
-      /*
-         อ่านไฟล์เดิม
-      */
-
       const file =
         await fileHandle
           .getFile();
@@ -1210,27 +1137,15 @@ async function backupScan(
         await file.text();
 
 
-      /*
-         สร้างข้อมูล Scan ใหม่
-      */
-
       const newRow =
         createCSVRow(
           scanData
         );
 
 
-      /*
-         เพิ่มต่อท้าย
-      */
-
       let finalText =
         oldText;
 
-
-      /*
-         ป้องกัน BOM ซ้ำ
-      */
 
       finalText =
         finalText.replace(
@@ -1238,11 +1153,6 @@ async function backupScan(
           ""
         );
 
-
-      /*
-         ถ้าไฟล์ไม่ลงท้ายด้วย New Line
-         ให้เพิ่มก่อน
-      */
 
       if(
 
@@ -1258,18 +1168,10 @@ async function backupScan(
       }
 
 
-      /*
-         เพิ่มข้อมูล Scan
-      */
-
       finalText +=
         newRow +
         "\r\n";
 
-
-      /*
-         เขียนไฟล์เดิมกลับ
-      */
 
       const writable =
         await fileHandle
@@ -1291,16 +1193,10 @@ async function backupScan(
 
 
     /* ========================================================
-       FILE DOES NOT EXIST
+       CREATE TODAY FILE
     ======================================================== */
 
     else{
-
-      /*
-         สร้างไฟล์ของวันนี้
-         
-         เพียงครั้งเดียว
-      */
 
       fileHandle =
         await backupFolderHandle
@@ -1345,12 +1241,6 @@ async function backupScan(
     }
 
 
-    /*
-       ========================================================
-       STATUS
-       ========================================================
-    */
-
     setBackupStatus(
 
       "✅ Auto Backup สำเร็จ → C:\\Count stock\\" +
@@ -1391,7 +1281,7 @@ async function backupScan(
 
 
 /* ============================================================
-   BACKUP STATUS BUTTON
+   BACKUP STATUS
 ============================================================ */
 
 function showBackupInfo(){
@@ -1479,10 +1369,6 @@ async function scan(v){
     .style.display =
     "none";
 
-
-  /* ==========================================================
-     EMPTY
-  ========================================================== */
 
   if(
     !v ||
@@ -1682,10 +1568,7 @@ async function scan(v){
 
   /* ==========================================================
      AUTO BACKUP
-     
-     ทุก Scan
-     → Backup ทันที
-============================================================ */
+  ========================================================== */
 
   await backupScan(
     scanData
@@ -1806,10 +1689,6 @@ function render(){
   }
 
 
-  /* ==========================================================
-     SUMMARY
-  ========================================================== */
-
   renderSummary();
 
 }
@@ -1862,7 +1741,7 @@ function escapeHtml(value){
 
 
 /* ============================================================
-   DELETE ONE ROW
+   DELETE
 ============================================================ */
 
 function del(i){
@@ -1973,25 +1852,13 @@ function renderSummary(){
       }
 
 
-      /* ------------------------------------------------------
-         UNIT
-      ------------------------------------------------------ */
-
       summaryData[row][part]
         .unit++;
 
 
-      /* ------------------------------------------------------
-         QTY
-      ------------------------------------------------------ */
-
       const currentQty =
         Number(x.qty) || 0;
 
-
-      /*
-         ใช้ Q'ty ของ Scan แรก
-      */
 
       if(
 
@@ -2006,17 +1873,6 @@ function renderSummary(){
 
       }
 
-
-      /*
-         Unit × Q'ty
-         
-         เช่น:
-         
-         Unit = 3
-         Q'ty = 53
-         
-         Total = 159
-      */
 
       summaryData[row][part]
         .totalQty +=
@@ -2049,7 +1905,7 @@ function renderSummary(){
 
 
   /* ==========================================================
-     BUILD
+     BUILD SUMMARY
   ========================================================== */
 
   let html = "";
@@ -2101,7 +1957,6 @@ function renderSummary(){
               border-collapse:collapse;
             "
           >
-
 
             <thead>
 
@@ -2295,10 +2150,6 @@ function renderSummary(){
 
 /* ============================================================
    CLEAR ALL
-     
-   มี Pop-up ยืนยัน
-     
-   ไม่ลบ Backup
 ============================================================ */
 
 function clearAll(){
@@ -2332,10 +2183,6 @@ function clearAll(){
   }
 
 
-  /* ==========================================================
-     CLEAR MEMORY
-  ========================================================== */
-
   data = [];
 
   scanned = [];
@@ -2343,17 +2190,9 @@ function clearAll(){
   latestRowFocus = "";
 
 
-  /* ==========================================================
-     CLEAR TABLE
-  ========================================================== */
-
   tb.innerHTML =
     "";
 
-
-  /* ==========================================================
-     CLEAR SUMMARY
-  ========================================================== */
 
   document
     .getElementById(
@@ -2363,10 +2202,6 @@ function clearAll(){
     "";
 
 
-  /* ==========================================================
-     CLEAR ALERT
-  ========================================================== */
-
   document
     .getElementById(
       "duplicateAlert"
@@ -2374,10 +2209,6 @@ function clearAll(){
     .style.display =
     "none";
 
-
-  /* ==========================================================
-     STATUS
-  ========================================================== */
 
   if(
     backupFolderHandle
@@ -2411,149 +2242,727 @@ function clearAll(){
 
 
 /* ============================================================
-   EXPORT CURRENT DATA TO CSV
+   EXPORT EXCEL
      
-   เป็นไฟล์ Export แยก
-   ไม่กระทบ Backup รายวัน
+   RawData
+   +
+   Summary
 ============================================================ */
 
-function exportCSV(){
+function exportExcel(){
+
+  /* ==========================================================
+     CHECK DATA
+  ========================================================== */
 
   if(
     data.length === 0
   ){
 
     alert(
-      "ยังไม่มีข้อมูลสำหรับ Export"
+      "ยังไม่มีข้อมูลสำหรับ Export Excel"
     );
+
+    qr.focus();
 
     return;
 
   }
 
 
-  let rows = [];
+  /* ==========================================================
+     CREATE WORKBOOK
+  ========================================================== */
+
+  const wb =
+    XLSX.utils.book_new();
 
 
-  /* HEADER */
+  /* ==========================================================
+     RAW DATA
+  ========================================================== */
 
-  rows.push(
+  const rawData =
+    data.map(
+      (x,i) => ({
 
-    [
+        Row:
+          x.row,
 
-      "Row",
+        No:
+          i + 1,
 
-      "No",
+        Line:
+          x.line,
 
-      "Line",
+        Location:
+          x.location,
 
-      "Location",
+        Part:
+          x.part,
 
-      "Part",
+        "Q'ty":
+          Number(x.qty) || 0,
 
-      "Q'ty",
+        PO:
+          x.po,
 
-      "PO",
+        LOT:
+          x.lot,
 
-      "LOT",
+        Remark:
+          x.remark,
 
-      "Remark",
+        Time:
+          x.time
 
-      "Time"
+      })
+    );
 
-    ]
 
-    .map(
-      csvEscape
-    )
+  /* ==========================================================
+     CREATE RAW SHEET
+  ========================================================== */
 
-    .join(",")
+  const ws1 =
+    XLSX.utils.json_to_sheet(
+      rawData
+    );
+
+
+  /* ==========================================================
+     RAW DATA HEADER STYLE
+  ========================================================== */
+
+  if(ws1["!ref"]){
+
+    const range =
+      XLSX.utils.decode_range(
+        ws1["!ref"]
+      );
+
+
+    for(
+      let C = range.s.c;
+      C <= range.e.c;
+      C++
+    ){
+
+      const addr =
+        XLSX.utils.encode_cell({
+
+          r:0,
+
+          c:C
+
+        });
+
+
+      if(
+        ws1[addr]
+      ){
+
+        ws1[addr].s = {
+
+          font:{
+
+            bold:true,
+
+            color:{
+              rgb:"FFFFFF"
+            }
+
+          },
+
+          fill:{
+
+            fgColor:{
+              rgb:"4472C4"
+            }
+
+          },
+
+          alignment:{
+
+            horizontal:
+              "center",
+
+            vertical:
+              "center"
+
+          }
+
+        };
+
+      }
+
+    }
+
+  }
+
+
+  /* ==========================================================
+     RAW DATA COLUMN WIDTH
+  ========================================================== */
+
+  ws1["!cols"] = [
+
+    {wch:8},
+
+    {wch:8},
+
+    {wch:12},
+
+    {wch:20},
+
+    {wch:22},
+
+    {wch:12},
+
+    {wch:18},
+
+    {wch:15},
+
+    {wch:35},
+
+    {wch:22}
+
+  ];
+
+
+  /* ==========================================================
+     APPEND RAW DATA
+  ========================================================== */
+
+  XLSX.utils.book_append_sheet(
+
+    wb,
+
+    ws1,
+
+    "RawData"
 
   );
 
 
-  /* DATA */
+  /* ==========================================================
+     SUMMARY DATA
+  ========================================================== */
+
+  let summaryData = {};
+
 
   data.forEach(
-    (x,i) => {
+    x => {
 
-      rows.push(
+      const row =
+        String(
+          x.row
+        );
 
-        [
 
-          x.row,
+      const part =
+        String(
+          x.part || "-"
+        ).trim();
 
-          i + 1,
 
-          x.line,
+      if(
+        !summaryData[row]
+      ){
 
-          x.location,
+        summaryData[row] = {};
 
-          x.part,
+      }
 
-          Number(x.qty) || 0,
 
-          x.po,
+      if(
+        !summaryData[row][part]
+      ){
 
-          x.lot,
+        summaryData[row][part] = {
 
-          x.remark,
+          unit:0,
 
-          x.time
+          qtyPerUnit:0,
 
-        ]
+          totalQty:0
 
-        .map(
-          csvEscape
-        )
+        };
 
-        .join(",")
+      }
 
-      );
+
+      /* ------------------------------------------------------
+         UNIT
+      ------------------------------------------------------ */
+
+      summaryData[row][part]
+        .unit++;
+
+
+      /* ------------------------------------------------------
+         QTY
+      ------------------------------------------------------ */
+
+      const currentQty =
+        Number(x.qty) || 0;
+
+
+      if(
+
+        summaryData[row][part]
+          .unit === 1
+
+      ){
+
+        summaryData[row][part]
+          .qtyPerUnit =
+          currentQty;
+
+      }
+
+
+      /* ------------------------------------------------------
+         TOTAL QTY
+         
+         Unit × Q'ty
+      ------------------------------------------------------ */
+
+      summaryData[row][part]
+        .totalQty +=
+        currentQty;
 
     }
   );
 
 
-  const csv =
+  /* ==========================================================
+     BUILD SUMMARY SHEET
+  ========================================================== */
 
-    "\uFEFF" +
+  let summarySheet = [];
 
-    rows.join(
-      "\r\n"
+
+  Object.keys(
+    summaryData
+  )
+
+  .sort(
+    (a,b) =>
+      Number(a) -
+      Number(b)
+  )
+
+  .forEach(
+    r => {
+
+      let totalUnit = 0;
+
+      let totalQty = 0;
+
+
+      Object.keys(
+        summaryData[r]
+      )
+
+      .forEach(
+        p => {
+
+          const unit =
+            summaryData[r][p]
+              .unit;
+
+
+          const qtyPerUnit =
+            summaryData[r][p]
+              .qtyPerUnit;
+
+
+          const totalQtyPart =
+            summaryData[r][p]
+              .totalQty;
+
+
+          totalUnit +=
+            unit;
+
+
+          totalQty +=
+            totalQtyPart;
+
+
+          summarySheet.push({
+
+            Row:
+              r,
+
+            Part:
+              p,
+
+            Unit:
+              unit,
+
+            "Q'ty / Unit":
+              qtyPerUnit,
+
+            "Total Q'ty":
+              totalQtyPart
+
+          });
+
+        }
+      );
+
+
+      /* ======================================================
+         TOTAL ROW
+      ====================================================== */
+
+      summarySheet.push({
+
+        Row:
+          r,
+
+        Part:
+          "TOTAL",
+
+        Unit:
+          totalUnit,
+
+        "Q'ty / Unit":
+          "",
+
+        "Total Q'ty":
+          totalQty
+
+      });
+
+    }
+  );
+
+
+  /* ==========================================================
+     CREATE SUMMARY WORKSHEET
+  ========================================================== */
+
+  const ws2 =
+    XLSX.utils.json_to_sheet(
+      summarySheet
     );
 
 
-  const blob =
-    new Blob(
+  /* ==========================================================
+     SUMMARY HEADER STYLE
+  ========================================================== */
 
-      [csv],
+  if(ws2["!ref"]){
 
-      {
-        type:
-          "text/csv;charset=utf-8;"
+    const range =
+      XLSX.utils.decode_range(
+        ws2["!ref"]
+      );
+
+
+    for(
+      let R = range.s.r;
+      R <= range.e.r;
+      R++
+    ){
+
+      for(
+        let C = range.s.c;
+        C <= range.e.c;
+        C++
+      ){
+
+        const addr =
+          XLSX.utils.encode_cell({
+
+            r:R,
+
+            c:C
+
+          });
+
+
+        const cell =
+          ws2[addr];
+
+
+        if(!cell){
+
+          continue;
+
+        }
+
+
+        /* ====================================================
+           HEADER
+        ==================================================== */
+
+        if(R === 0){
+
+          cell.s = {
+
+            font:{
+
+              bold:true,
+
+              color:{
+                rgb:"FFFFFF"
+              }
+
+            },
+
+            fill:{
+
+              fgColor:{
+                rgb:"4472C4"
+              }
+
+            },
+
+            alignment:{
+
+              horizontal:
+                "center",
+
+              vertical:
+                "center"
+
+            }
+
+          };
+
+        }
+
+
+        /* ====================================================
+           TOTAL ROW
+        ==================================================== */
+
+        if(
+          ws2[
+            XLSX.utils.encode_cell({
+
+              r:R,
+
+              c:1
+
+            })
+          ] &&
+          ws2[
+            XLSX.utils.encode_cell({
+
+              r:R,
+
+              c:1
+
+            })
+          ].v === "TOTAL"
+
+        ){
+
+          for(
+            let C2 = 0;
+            C2 <= 4;
+            C2++
+          ){
+
+            const totalAddr =
+              XLSX.utils.encode_cell({
+
+                r:R,
+
+                c:C2
+
+              });
+
+
+            if(
+              ws2[totalAddr]
+            ){
+
+              ws2[totalAddr].s = {
+
+                font:{
+
+                  bold:true
+
+                },
+
+                fill:{
+
+                  fgColor:{
+                    rgb:"B7DEE8"
+                  }
+
+                },
+
+                alignment:{
+
+                  vertical:
+                    "center"
+
+                }
+
+              };
+
+            }
+
+          }
+
+        }
+
       }
 
-    );
+    }
+
+  }
 
 
-  const url =
-    URL.createObjectURL(
-      blob
-    );
+  /* ==========================================================
+     SUMMARY COLUMN WIDTH
+  ========================================================== */
+
+  ws2["!cols"] = [
+
+    {wch:10},
+
+    {wch:25},
+
+    {wch:12},
+
+    {wch:15},
+
+    {wch:15}
+
+  ];
 
 
-  const a =
-    document.createElement(
-      "a"
-    );
+  /* ==========================================================
+     NUMBER FORMAT
+  ========================================================== */
+
+  if(ws2["!ref"]){
+
+    const range =
+      XLSX.utils.decode_range(
+        ws2["!ref"]
+      );
 
 
-  a.href =
-    url;
+    for(
+      let R = 1;
+      R <= range.e.r;
+      R++
+    ){
+
+      /*
+         Unit
+      */
+
+      const unitCell =
+        ws2[
+          XLSX.utils.encode_cell({
+
+            r:R,
+
+            c:2
+
+          })
+        ];
 
 
-  a.download =
+      if(unitCell){
+
+        unitCell.z =
+          "#,##0";
+
+      }
+
+
+      /*
+         Q'ty / Unit
+      */
+
+      const qtyCell =
+        ws2[
+          XLSX.utils.encode_cell({
+
+            r:R,
+
+            c:3
+
+          })
+        ];
+
+
+      if(
+        qtyCell &&
+        typeof qtyCell.v === "number"
+      ){
+
+        qtyCell.z =
+          "#,##0";
+
+      }
+
+
+      /*
+         Total Q'ty
+      */
+
+      const totalCell =
+        ws2[
+          XLSX.utils.encode_cell({
+
+            r:R,
+
+            c:4
+
+          })
+        ];
+
+
+      if(
+        totalCell &&
+        typeof totalCell.v === "number"
+      ){
+
+        totalCell.z =
+          "#,##0";
+
+      }
+
+    }
+
+  }
+
+
+  /* ==========================================================
+     APPEND SUMMARY
+  ========================================================== */
+
+  XLSX.utils.book_append_sheet(
+
+    wb,
+
+    ws2,
+
+    "Summary"
+
+  );
+
+
+  /* ==========================================================
+     FILE NAME
+     
+     Stock Counting_20260829_Export.xlsx
+  ========================================================== */
+
+  const fileName =
 
     BACKUP_FILE_PREFIX +
 
@@ -2561,25 +2970,33 @@ function exportCSV(){
 
     getDateString() +
 
-    "_Export.csv";
+    "_Export.xlsx";
 
 
-  document.body.appendChild(
-    a
+  /* ==========================================================
+     EXPORT
+  ========================================================== */
+
+  XLSX.writeFile(
+
+    wb,
+
+    fileName
+
   );
 
 
-  a.click();
+  setBackupStatus(
 
+    "✅ Export Excel สำเร็จ → " +
+    fileName,
 
-  document.body.removeChild(
-    a
+    "ok"
+
   );
 
 
-  URL.revokeObjectURL(
-    url
-  );
+  qr.focus();
 
 }
 
@@ -2627,4 +3044,3 @@ qr.focus();
 </body>
 
 </html>
-```
