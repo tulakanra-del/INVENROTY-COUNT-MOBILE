@@ -1,13 +1,17 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0"
+>
 
 <title>INVENTORY COUNTING SYSTEM</title>
 
-<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 
 <style>
 
@@ -16,11 +20,17 @@
 ============================================================ */
 
 body{
+
   font-family:Arial,sans-serif;
+
   background:#f4f6f9;
+
   margin:0;
+
   padding:20px;
+
   color:#111;
+
 }
 
 
@@ -29,12 +39,21 @@ body{
 ============================================================ */
 
 .container{
+
   max-width:1300px;
+
   margin:auto;
+
   background:#fff;
+
   padding:24px;
+
   border-radius:14px;
-  box-shadow:0 6px 18px rgba(0,0,0,0.08);
+
+  box-shadow:
+    0 6px 18px
+    rgba(0,0,0,0.08);
+
 }
 
 
@@ -43,7 +62,9 @@ body{
 ============================================================ */
 
 h2{
+
   margin-top:0;
+
 }
 
 
@@ -52,19 +73,31 @@ h2{
 ============================================================ */
 
 .scan-row{
+
   display:flex;
+
   gap:15px;
+
   margin-bottom:15px;
+
 }
+
 
 input,
 select{
+
   width:100%;
+
   padding:14px;
+
   font-size:16px;
+
   border-radius:10px;
+
   border:1px solid #cbd5e1;
+
   box-sizing:border-box;
+
 }
 
 
@@ -73,40 +106,70 @@ select{
 ============================================================ */
 
 button{
+
   padding:12px 16px;
+
   border:none;
+
   border-radius:10px;
+
   cursor:pointer;
+
   font-weight:bold;
+
   margin-right:6px;
+
 }
+
 
 .btn-blue{
+
   background:#2563eb;
+
   color:#fff;
+
 }
+
 
 .btn-green{
+
   background:#16a34a;
+
   color:#fff;
+
 }
+
 
 .btn-orange{
+
   background:#f59e0b;
+
   color:#fff;
+
 }
+
 
 .btn-red{
+
   background:#dc2626;
+
   color:#fff;
+
 }
 
+
 .del-btn{
+
   background:#ef4444;
+
   color:#fff;
+
   padding:6px 10px;
+
   border-radius:6px;
+
   font-size:12px;
+
 }
 
 
@@ -115,22 +178,37 @@ button{
 ============================================================ */
 
 #backupStatus{
+
   margin-top:12px;
+
   padding:10px 12px;
+
   background:#f1f5f9;
+
   border-radius:8px;
+
   font-size:13px;
+
   color:#475569;
+
 }
+
 
 #backupStatus.ok{
+
   background:#dcfce7;
+
   color:#166534;
+
 }
 
+
 #backupStatus.error{
+
   background:#fee2e2;
+
   color:#991b1b;
+
 }
 
 
@@ -139,35 +217,60 @@ button{
 ============================================================ */
 
 .table-container{
+
   margin-top:20px;
+
   max-height:420px;
+
   overflow:auto;
+
   border:1px solid #ddd;
+
   border-radius:10px;
+
 }
 
+
 table{
+
   width:100%;
+
   border-collapse:collapse;
+
 }
+
 
 th,
 td{
+
   border:1px solid #e5e7eb;
+
   padding:8px;
+
   font-size:13px;
+
   white-space:nowrap;
+
 }
+
 
 th{
+
   background:#f1f5f9;
+
   position:sticky;
+
   top:0;
+
   z-index:10;
+
 }
 
+
 .latest{
+
   background:#fff7cc;
+
 }
 
 
@@ -176,34 +279,62 @@ th{
 ============================================================ */
 
 #summaryWrapper{
+
   margin-top:20px;
+
   border:1px solid #ddd;
+
   border-radius:10px;
+
   max-height:350px;
+
   overflow-y:auto;
+
   padding:12px;
+
   background:#fafafa;
+
 }
+
 
 .summary-box{
+
   background:#fff;
+
   border:2px solid #e5e7eb;
+
   border-radius:12px;
+
   padding:14px;
+
   margin-bottom:12px;
+
   transition:0.2s;
+
 }
+
 
 .summary-focus{
+
   border:2px solid #2563eb;
+
   background:#eff6ff;
-  box-shadow:0 0 0 3px rgba(37,99,235,0.15);
+
+  box-shadow:
+    0 0 0 3px
+    rgba(37,99,235,0.15);
+
 }
 
+
 .summary-title{
+
   font-size:18px;
+
   font-weight:bold;
+
   margin-bottom:10px;
+
 }
 
 
@@ -212,13 +343,42 @@ th{
 ============================================================ */
 
 #duplicateAlert{
+
   display:none;
+
   background:#fee2e2;
+
   color:#991b1b;
+
   padding:12px;
+
   border-radius:10px;
+
   margin-bottom:15px;
+
   font-weight:bold;
+
+}
+
+
+/* ============================================================
+   MOBILE
+============================================================ */
+
+@media(max-width:700px){
+
+  .scan-row{
+
+    flex-direction:column;
+
+  }
+
+  .container{
+
+    padding:15px;
+
+  }
+
 }
 
 </style>
@@ -228,9 +388,13 @@ th{
 
 <body>
 
+
 <div class="container">
 
-<h2>📦 INVENTORY COUNT SYSTEM</h2>
+
+<h2>
+  📦 INVENTORY COUNT SYSTEM
+</h2>
 
 
 <!-- ============================================================
@@ -239,13 +403,16 @@ th{
 
 <div class="scan-row">
 
+
 <select id="rowSelect"></select>
+
 
 <input
   id="qrInput"
   placeholder="Scan QR Code..."
   autofocus
-/>
+>
+
 
 </div>
 
@@ -255,27 +422,37 @@ th{
 ============================================================ -->
 
 <div id="duplicateAlert">
-  ⚠ Duplicate Item
+
+  ⚠ Duplicate QR Code
+
 </div>
 
 
 <!-- ============================================================
-     BUTTON
+     BUTTONS
 ============================================================ -->
 
 <button
   class="btn-green"
-  onclick="selectBackupFolder()"
+  onclick="selectBackupDrive()"
 >
-  📁 ตั้งค่า Backup C:
+  📁 ตั้งค่า C:\Count stock
 </button>
 
 
 <button
   class="btn-blue"
-  onclick="exportExcel()"
+  onclick="manualBackup()"
 >
-  📊 Export Excel
+  💾 Backup CSV
+</button>
+
+
+<button
+  class="btn-orange"
+  onclick="exportExcelCompatibleCSV()"
+>
+  📊 Export CSV
 </button>
 
 
@@ -292,7 +469,9 @@ th{
 ============================================================ -->
 
 <div id="backupStatus">
-  ⚠ ยังไม่ได้ตั้งค่าโฟลเดอร์ Backup
+
+  ⚠ ยังไม่ได้ตั้งค่า Backup Folder
+
 </div>
 
 
@@ -302,9 +481,12 @@ th{
 
 <div class="table-container">
 
+
 <table>
 
+
 <thead>
+
 
 <tr>
 
@@ -332,12 +514,15 @@ th{
 
 </tr>
 
+
 </thead>
 
 
 <tbody id="tb"></tbody>
 
+
 </table>
+
 
 </div>
 
@@ -348,18 +533,20 @@ th{
 
 <div id="summaryWrapper">
 
-<div id="summary"></div>
+  <div id="summary"></div>
 
 </div>
 
 
 </div>
+
 
 
 <script>
 
+
 /* ============================================================
-   GLOBAL
+   GLOBAL DATA
 ============================================================ */
 
 let data = [];
@@ -369,25 +556,27 @@ let scanned = [];
 let latestRowFocus = "";
 
 
+/* ============================================================
+   BACKUP SETTINGS
+============================================================ */
+
+const BACKUP_FOLDER_NAME =
+  "Count stock";
+
+
+const BACKUP_FILE_PREFIX =
+  "Count stock";
+
+
 /*
    File System Access API
 
-   ใช้สำหรับเลือก C:\ และสร้างโฟลเดอร์
-   C:\Count stock
+   ใช้สำหรับเขียนไฟล์ลง C:\
 */
 
 let backupRootHandle = null;
 
 let backupFolderHandle = null;
-
-
-/* ============================================================
-   BACKUP CONFIG
-============================================================ */
-
-const BACKUP_FOLDER_NAME = "Count stock";
-
-const BACKUP_PREFIX = "Count stock";
 
 
 /* ============================================================
@@ -397,36 +586,49 @@ const BACKUP_PREFIX = "Count stock";
 const tb =
   document.getElementById("tb");
 
+
 const qr =
   document.getElementById("qrInput");
+
 
 const rowSelect =
   document.getElementById("rowSelect");
 
+
 const backupStatus =
-  document.getElementById("backupStatus");
+  document.getElementById(
+    "backupStatus"
+  );
 
 
 /* ============================================================
    CREATE ROW 1 - 50
 ============================================================ */
 
-for(let i = 1; i <= 50; i++){
+for(
+  let i = 1;
+  i <= 50;
+  i++
+){
 
   rowSelect.innerHTML += `
+
     <option value="${i}">
+
       Row ${i}
+
     </option>
+
   `;
 
 }
 
 
 /* ============================================================
-   CHECK FILE SYSTEM API
+   CHECK BROWSER SUPPORT
 ============================================================ */
 
-function isFileSystemAccessSupported(){
+function isBackupSupported(){
 
   return (
     "showDirectoryPicker" in window
@@ -454,26 +656,27 @@ function setBackupStatus(
 
 
 /* ============================================================
-   SELECT BACKUP ROOT
+   SELECT C:\ DRIVE
      
-   ผู้ใช้เลือก C: ครั้งแรก
+   ผู้ใช้เลือก C:\ เพียงครั้งแรก
      
-   จากนั้นระบบสร้าง:
+   จากนั้นสร้าง:
      
    C:\Count stock
-     
-   ถ้ามีอยู่แล้วจะใช้ของเดิม
 ============================================================ */
 
-async function selectBackupFolder(){
+async function selectBackupDrive(){
 
   if(
-    !isFileSystemAccessSupported()
+    !isBackupSupported()
   ){
 
     alert(
-      "Browser นี้ไม่รองรับการเขียนไฟล์ลงโฟลเดอร์โดยตรง\n\n" +
-      "แนะนำให้ใช้ Google Chrome หรือ Microsoft Edge รุ่นใหม่"
+
+      "Browser นี้ไม่รองรับการเขียนไฟล์ลง C:\\ โดยตรง\n\n" +
+
+      "กรุณาใช้ Microsoft Edge หรือ Google Chrome รุ่นใหม่"
+
     );
 
     return;
@@ -484,31 +687,39 @@ async function selectBackupFolder(){
   try{
 
     /*
-      เปิดหน้าต่างเลือกโฟลเดอร์
+       เปิดหน้าต่างเลือก Folder
     */
 
     backupRootHandle =
       await window.showDirectoryPicker({
+
         mode:"readwrite"
+
       });
 
 
     /*
-      ตรวจสอบสิทธิ์
+       ตรวจสอบ Permission
     */
 
     const permission =
       await verifyPermission(
+
         backupRootHandle,
+
         true
+
       );
 
 
     if(!permission){
 
       setBackupStatus(
-        "❌ ไม่ได้รับสิทธิ์เขียนไฟล์ Backup",
+
+        "❌ ไม่ได้รับสิทธิ์เขียนไฟล์",
+
         "error"
+
       );
 
       return;
@@ -517,59 +728,63 @@ async function selectBackupFolder(){
 
 
     /*
-      สร้าง / เปิด Count stock
+       สร้าง / เปิด Count stock
+       
+       ถ้ามีอยู่แล้วจะไม่สร้างซ้ำ
     */
 
     backupFolderHandle =
-      await backupRootHandle.getDirectoryHandle(
-        BACKUP_FOLDER_NAME,
-        {
-          create:true
-        }
-      );
+      await backupRootHandle
+        .getDirectoryHandle(
 
+          BACKUP_FOLDER_NAME,
 
-    /*
-      เก็บสถานะใน Browser
-    */
+          {
+            create:true
+          }
 
-    try{
-
-      localStorage.setItem(
-        "backupFolderConfigured",
-        "true"
-      );
-
-    }catch(e){}
+        );
 
 
     setBackupStatus(
-      "✅ Backup พร้อมใช้งาน → " +
-      BACKUP_FOLDER_NAME,
+
+      "✅ Backup พร้อมใช้งาน → C:\\Count stock",
+
       "ok"
+
     );
 
 
     /*
-      Backup ข้อมูลปัจจุบันทันที
-      ถ้ามีข้อมูลอยู่
+       ถ้ามีข้อมูลอยู่แล้ว
+       Backup ทันที
     */
 
-    if(data.length > 0){
+    if(
+      data.length > 0
+    ){
 
-      await createBackupFile();
+      await createBackupCSV();
 
     }
 
 
     alert(
+
       "ตั้งค่า Backup สำเร็จ\n\n" +
-      "ระบบจะสร้างไฟล์ในโฟลเดอร์:\n" +
-      BACKUP_FOLDER_NAME
+
+      "โฟลเดอร์:\n" +
+
+      "C:\\Count stock"
+
     );
 
 
-  }catch(error){
+    qr.focus();
+
+
+  }
+  catch(error){
 
     console.error(
       "Backup folder error:",
@@ -578,8 +793,11 @@ async function selectBackupFolder(){
 
 
     setBackupStatus(
-      "❌ ไม่สามารถตั้งค่า Backup ได้",
+
+      "❌ ไม่สามารถตั้งค่า Backup Folder ได้",
+
       "error"
+
     );
 
   }
@@ -600,6 +818,7 @@ async function verifyPermission(
 
     const options = {};
 
+
     if(withWrite){
 
       options.mode =
@@ -609,8 +828,11 @@ async function verifyPermission(
 
 
     if(
-      (await handle.queryPermission(options))
-      === "granted"
+      (
+        await handle.queryPermission(
+          options
+        )
+      ) === "granted"
     ){
 
       return true;
@@ -619,8 +841,11 @@ async function verifyPermission(
 
 
     if(
-      (await handle.requestPermission(options))
-      === "granted"
+      (
+        await handle.requestPermission(
+          options
+        )
+      ) === "granted"
     ){
 
       return true;
@@ -630,7 +855,8 @@ async function verifyPermission(
 
     return false;
 
-  }catch(error){
+  }
+  catch(error){
 
     console.error(
       "Permission error:",
@@ -645,7 +871,7 @@ async function verifyPermission(
 
 
 /* ============================================================
-   GENERATE DATE
+   DATE
      
    YYYYMMDD
 ============================================================ */
@@ -663,26 +889,36 @@ function getDateString(){
   const month =
     String(
       now.getMonth() + 1
-    ).padStart(2,"0");
+    ).padStart(
+      2,
+      "0"
+    );
 
 
   const day =
     String(
       now.getDate()
-    ).padStart(2,"0");
+    ).padStart(
+      2,
+      "0"
+    );
 
 
   return (
+
     year +
+
     month +
+
     day
+
   );
 
 }
 
 
 /* ============================================================
-   GENERATE TIME
+   TIME
      
    HHMMSS
 ============================================================ */
@@ -696,105 +932,124 @@ function getTimeString(){
   const hour =
     String(
       now.getHours()
-    ).padStart(2,"0");
+    ).padStart(
+      2,
+      "0"
+    );
 
 
   const minute =
     String(
       now.getMinutes()
-    ).padStart(2,"0");
+    ).padStart(
+      2,
+      "0"
+    );
 
 
   const second =
     String(
       now.getSeconds()
-    ).padStart(2,"0");
+    ).padStart(
+      2,
+      "0"
+    );
 
 
   return (
+
     hour +
+
     minute +
+
     second
+
   );
 
 }
 
 
 /* ============================================================
-   GET UNIQUE FILE NAME
+   UNIQUE FILE NAME
      
-   ตัวอย่าง:
-     
-   Count stock_20260829_100530.json
+   Count stock_20260829_070501.csv
      
    ถ้าซ้ำ:
      
-   Count stock_20260829_100530 (1).json
-   Count stock_20260829_100530 (2).json
+   Count stock_20260829_070501 (1).csv
+   Count stock_20260829_070501 (2).csv
 ============================================================ */
 
-async function getUniqueBackupFileName(){
-
-  const date =
-    getDateString();
-
-  const time =
-    getTimeString();
-
+async function getUniqueFileName(){
 
   const baseName =
-    BACKUP_PREFIX +
+
+    BACKUP_FILE_PREFIX +
+
     "_" +
-    date +
+
+    getDateString() +
+
     "_" +
-    time;
+
+    getTimeString();
 
 
   let fileName =
     baseName +
-    ".json";
+    ".csv";
 
 
-  let counter =
-    1;
+  let counter = 1;
 
-
-  /*
-    ตรวจสอบชื่อไฟล์
-  */
 
   while(true){
 
     try{
 
-      await backupFolderHandle.getFileHandle(
-        fileName,
-        {
-          create:false
-        }
-      );
+      /*
+         ถ้ามีไฟล์อยู่
+         getFileHandle จะหาเจอ
+      */
+
+      await backupFolderHandle
+        .getFileHandle(
+
+          fileName,
+
+          {
+            create:false
+          }
+
+        );
 
 
       /*
-        ถ้ามีไฟล์แล้ว
-        ให้สร้างชื่อใหม่
+         ไฟล์ซ้ำ
       */
 
       fileName =
+
         baseName +
+
         " (" +
+
         counter +
-        ").json";
+
+        ")" +
+
+        ".csv";
 
 
       counter++;
 
 
-    }catch(error){
+    }
+    catch(error){
 
       /*
-        หาไฟล์ไม่เจอ
-        ใช้ชื่อปัจจุบันได้
+         ไม่พบไฟล์
+         ใช้ชื่อปัจจุบัน
       */
 
       return fileName;
@@ -807,23 +1062,189 @@ async function getUniqueBackupFileName(){
 
 
 /* ============================================================
-   CREATE BACKUP FILE
-     
-   Backup ทุกครั้งหลัง Scan
+   CSV ESCAPE
 ============================================================ */
 
-async function createBackupFile(){
+function csvEscape(value){
+
+  if(
+    value === null ||
+    value === undefined
+  ){
+
+    return "";
+
+  }
+
+
+  let text =
+    String(value);
+
+
+  /*
+     CSV ต้อง escape:
+     
+     "
+     ,
+     newline
+  */
+
+  text =
+    text.replace(
+      /"/g,
+      '""'
+    );
+
+
+  if(
+    text.includes(",") ||
+    text.includes('"') ||
+    text.includes("\n") ||
+    text.includes("\r")
+  ){
+
+    return '"' +
+      text +
+      '"';
+
+  }
+
+
+  return text;
+
+}
+
+
+/* ============================================================
+   CREATE CSV CONTENT
+     
+   UTF-8 BOM
+     
+   เปิด Excel ภาษาไทยได้ถูกต้อง
+============================================================ */
+
+function createCSVContent(){
+
+  let rows = [];
+
+
+  /* ==========================================================
+     HEADER
+  ========================================================== */
+
+  rows.push([
+
+    "Row",
+
+    "No",
+
+    "Line",
+
+    "Location",
+
+    "Part",
+
+    "Q'ty",
+
+    "PO",
+
+    "LOT",
+
+    "Remark",
+
+    "Time"
+
+  ]);
+
+
+  /* ==========================================================
+     DATA
+  ========================================================== */
+
+  data.forEach(
+    (x,i) => {
+
+      rows.push([
+
+        x.row,
+
+        i + 1,
+
+        x.line,
+
+        x.location,
+
+        x.part,
+
+        Number(x.qty) || 0,
+
+        x.po,
+
+        x.lot,
+
+        x.remark,
+
+        x.time
+
+      ]);
+
+    }
+  );
+
+
+  /*
+     แปลงเป็น CSV
+  */
+
+  const csv =
+    rows
+      .map(
+        row =>
+          row
+            .map(csvEscape)
+            .join(",")
+      )
+      .join("\r\n");
+
+
+  /*
+     UTF-8 BOM
+     
+     ช่วยให้ Excel อ่านภาษาไทย
+  */
+
+  return "\uFEFF" + csv;
+
+}
+
+
+/* ============================================================
+   CREATE BACKUP CSV
+     
+   Backup ทุกครั้งที่ Scan
+============================================================ */
+
+async function createBackupCSV(){
+
+  /*
+     ถ้ายังไม่ได้เลือก C:
+     
+     ไม่สามารถเขียนไฟล์ได้
+  */
 
   if(
     !backupFolderHandle
   ){
 
     setBackupStatus(
-      "⚠ Scan แล้ว แต่ยังไม่ได้ตั้งค่าโฟลเดอร์ Backup",
+
+      "⚠ Scan สำเร็จ แต่ยังไม่ได้ตั้งค่า C:\\Count stock",
+
       "error"
+
     );
 
-    return;
+    return false;
 
   }
 
@@ -831,113 +1252,165 @@ async function createBackupFile(){
   try{
 
     /*
-      ตรวจสอบ permission
+       ตรวจสอบ Permission
     */
 
     const permission =
       await verifyPermission(
+
         backupFolderHandle,
+
         true
+
       );
 
 
     if(!permission){
 
       setBackupStatus(
+
         "❌ ไม่มีสิทธิ์เขียนไฟล์ Backup",
+
         "error"
+
       );
 
-      return;
+      return false;
 
     }
 
 
     /*
-      สร้างชื่อไฟล์
+       สร้างชื่อไฟล์
     */
 
     const fileName =
-      await getUniqueBackupFileName();
+      await getUniqueFileName();
 
 
     /*
-      ข้อมูลที่จะ Backup
+       CSV
     */
 
-    const backupObject = {
-
-      backupDate:
-        new Date().toISOString(),
-
-      totalRecords:
-        data.length,
-
-      data:
-        data
-
-    };
+    const csv =
+      createCSVContent();
 
 
     /*
-      JSON
-    */
-
-    const json =
-      JSON.stringify(
-        backupObject,
-        null,
-        2
-      );
-
-
-    /*
-      สร้างไฟล์
+       สร้างไฟล์
     */
 
     const fileHandle =
-      await backupFolderHandle.getFileHandle(
-        fileName,
-        {
-          create:true
-        }
-      );
+      await backupFolderHandle
+        .getFileHandle(
 
+          fileName,
+
+          {
+            create:true
+          }
+
+        );
+
+
+    /*
+       เขียนไฟล์
+    */
 
     const writable =
-      await fileHandle.createWritable();
+      await fileHandle
+        .createWritable();
 
 
     await writable.write(
-      json
+      csv
     );
 
 
     await writable.close();
 
 
+    /*
+       Status
+    */
+
     setBackupStatus(
+
       "✅ Backup สำเร็จ: " +
       fileName,
+
       "ok"
+
     );
 
 
-  }catch(error){
+    return true;
+
+  }
+  catch(error){
 
     console.error(
-      "Create backup error:",
+      "CSV Backup Error:",
       error
     );
 
 
     setBackupStatus(
+
       "❌ Backup ไม่สำเร็จ: " +
       error.message,
+
       "error"
+
     );
 
+
+    return false;
+
   }
+
+}
+
+
+/* ============================================================
+   MANUAL BACKUP
+============================================================ */
+
+async function manualBackup(){
+
+  if(
+    data.length === 0
+  ){
+
+    alert(
+      "ยังไม่มีข้อมูลสำหรับ Backup"
+    );
+
+    return;
+
+  }
+
+
+  if(
+    !backupFolderHandle
+  ){
+
+    alert(
+
+      "กรุณาตั้งค่า Backup ก่อน\n\n" +
+
+      "กดปุ่ม:\n" +
+
+      "📁 ตั้งค่า C:\\Count stock"
+
+    );
+
+    return;
+
+  }
+
+
+  await createBackupCSV();
 
 }
 
@@ -947,20 +1420,28 @@ async function createBackupFile(){
 ============================================================ */
 
 qr.addEventListener(
+
   "keypress",
-  async e => {
 
-    if(e.key === "Enter"){
+  async function(e){
 
-      await scan(
-        qr.value
-      );
+    if(
+      e.key === "Enter"
+    ){
+
+      const value =
+        qr.value;
+
 
       qr.value = "";
+
+
+      await scan(value);
 
     }
 
   }
+
 );
 
 
@@ -970,15 +1451,21 @@ qr.addEventListener(
 
 async function scan(v){
 
+  /*
+     ปิด Alert
+  */
+
   document
-    .getElementById("duplicateAlert")
+    .getElementById(
+      "duplicateAlert"
+    )
     .style.display =
     "none";
 
 
-  /* ------------------------------------------------------------
+  /* ==========================================================
      EMPTY
-  ------------------------------------------------------------ */
+  ========================================================== */
 
   if(
     !v ||
@@ -996,16 +1483,18 @@ async function scan(v){
     v.trim();
 
 
-  /* ------------------------------------------------------------
+  /* ==========================================================
      DUPLICATE QR
-  ------------------------------------------------------------ */
+  ========================================================== */
 
   if(
     scanned.includes(v)
   ){
 
     document
-      .getElementById("duplicateAlert")
+      .getElementById(
+        "duplicateAlert"
+      )
       .style.display =
       "block";
 
@@ -1017,20 +1506,52 @@ async function scan(v){
   }
 
 
-  /* ------------------------------------------------------------
+  /* ==========================================================
      SAVE SCANNED QR
-  ------------------------------------------------------------ */
+  ========================================================== */
 
   scanned.push(v);
 
 
-  /* ------------------------------------------------------------
+  /* ==========================================================
      SPLIT QR
-  ------------------------------------------------------------ */
+     
+     ตัวอย่าง:
+     
+     200073618
+     |
+     T
+     |
+     QC FACT 1
+     |
+     1
+     |
+     VG79Y417H01
+     |
+     53
+     |
+     2608c640e61d762c4fe1
+     |
+     9100003596
+     |
+     1930
+     |
+     
+     d[1] = Line
+     d[2] = Location
+     d[4] = Part
+     d[5] = Q'ty
+     d[7] = PO
+     d[8] = LOT
+  ========================================================== */
 
   const d =
     v.split("|");
 
+
+  /* ==========================================================
+     ROW
+  ========================================================== */
 
   const row =
     rowSelect.value;
@@ -1040,100 +1561,96 @@ async function scan(v){
     row;
 
 
-  /* ------------------------------------------------------------
+  /* ==========================================================
      LINE
-  ------------------------------------------------------------ */
+  ========================================================== */
 
   const line =
     d[1] || "-";
 
 
-  /* ------------------------------------------------------------
+  /* ==========================================================
      LOCATION
-  ------------------------------------------------------------ */
+  ========================================================== */
 
   const location =
     d[2] || "-";
 
 
-  /* ------------------------------------------------------------
+  /* ==========================================================
      PART
-  ------------------------------------------------------------ */
+  ========================================================== */
 
   const part =
     d[4] || "-";
 
 
-  /* ------------------------------------------------------------
+  /* ==========================================================
      Q'TY
-     
-     ตัวอย่าง:
-     
-     200073618|T|QC FACT 1|1|VG79Y417H01|53|...
-                                                   ↑
-                                                  Q'ty
-  ------------------------------------------------------------ */
+  ========================================================== */
 
   const qty =
     parseInt(
-      d[5]
+      d[5],
+      10
     ) || 0;
 
 
-  /* ------------------------------------------------------------
+  /* ==========================================================
      PO
-  ------------------------------------------------------------ */
+  ========================================================== */
 
   const po =
     d[7] || "-";
 
 
-  /* ------------------------------------------------------------
+  /* ==========================================================
      LOT
-     
-     ตัวอย่าง:
-     
-     ...|9100003596|1930|
-                          ↑
-                         LOT
-  ------------------------------------------------------------ */
+  ========================================================== */
 
   const lot =
     d[8] || "-";
 
 
-  /* ------------------------------------------------------------
+  /* ==========================================================
      TIME
-  ------------------------------------------------------------ */
+  ========================================================== */
 
   const time =
-    new Date().toLocaleString();
+    new Date()
+      .toLocaleString();
 
 
-  /* ============================================================
-     REMARK
-  ============================================================ */
+  /* ==========================================================
+     DUPLICATE PART REMARK
+  ========================================================== */
 
   let duplicateRows = [];
 
 
-  data.forEach(item => {
+  data.forEach(
+    item => {
 
-    if(
-      item.part === part &&
-      item.row !== row &&
-      !duplicateRows.includes(
-        item.row
-      )
-    ){
+      if(
 
-      duplicateRows.push(
-        item.row
-      );
+        item.part === part &&
+
+        item.row !== row &&
+
+        !duplicateRows.includes(
+          item.row
+        )
+
+      ){
+
+        duplicateRows.push(
+          item.row
+        );
+
+      }
 
     }
-
-  });
+  );
 
 
   let remark = "";
@@ -1144,15 +1661,17 @@ async function scan(v){
   ){
 
     remark =
+
       "ข้อมูล Part item ซ้ำกับแถว " +
+
       duplicateRows.join(", ");
 
   }
 
 
-  /* ============================================================
+  /* ==========================================================
      SAVE DATA
-  ============================================================ */
+  ========================================================== */
 
   data.push({
 
@@ -1179,26 +1698,28 @@ async function scan(v){
   });
 
 
-  /* ------------------------------------------------------------
-     RENDER
-  ------------------------------------------------------------ */
+  /* ==========================================================
+     RENDER PAGE
+  ========================================================== */
 
   render();
 
 
-  /* ============================================================
+  /* ==========================================================
      AUTO BACKUP
      
      สำคัญ:
-     Backup หลัง Scan สำเร็จทันที
-  ============================================================ */
+     
+     ทุกครั้งที่ Scan สำเร็จ
+     จะสร้าง CSV ใหม่ทันที
+  ========================================================== */
 
-  await createBackupFile();
+  await createBackupCSV();
 
 
-  /* ------------------------------------------------------------
+  /* ==========================================================
      FOCUS
-  ------------------------------------------------------------ */
+  ========================================================== */
 
   qr.focus();
 
@@ -1206,7 +1727,7 @@ async function scan(v){
 
 
 /* ============================================================
-   RENDER
+   RENDER TABLE
 ============================================================ */
 
 function render(){
@@ -1219,51 +1740,63 @@ function render(){
 
       tb.innerHTML += `
 
-        <tr class="${
-          i === data.length - 1
-          ? "latest"
-          : ""
-        }">
+        <tr
+          class="${
+            i === data.length - 1
+            ? "latest"
+            : ""
+          }"
+        >
 
           <td>
             ${escapeHtml(x.row)}
           </td>
 
+
           <td>
             ${i + 1}
           </td>
+
 
           <td>
             ${escapeHtml(x.line)}
           </td>
 
+
           <td>
             ${escapeHtml(x.location)}
           </td>
+
 
           <td>
             ${escapeHtml(x.part)}
           </td>
 
+
           <td>
             ${escapeHtml(x.qty)}
           </td>
+
 
           <td>
             ${escapeHtml(x.po)}
           </td>
 
+
           <td>
             ${escapeHtml(x.lot)}
           </td>
+
 
           <td>
             ${escapeHtml(x.remark)}
           </td>
 
+
           <td>
             ${escapeHtml(x.time)}
           </td>
+
 
           <td>
 
@@ -1284,9 +1817,9 @@ function render(){
   );
 
 
-  /* ============================================================
+  /* ==========================================================
      AUTO SCROLL
-  ============================================================ */
+  ========================================================== */
 
   const tableBox =
     document.querySelector(
@@ -1302,9 +1835,9 @@ function render(){
   }
 
 
-  /* ============================================================
+  /* ==========================================================
      SUMMARY
-  ============================================================ */
+  ========================================================== */
 
   renderSummary();
 
@@ -1328,22 +1861,27 @@ function escapeHtml(value){
 
 
   return String(value)
+
     .replace(
       /&/g,
       "&amp;"
     )
+
     .replace(
       /</g,
       "&lt;"
     )
+
     .replace(
       />/g,
       "&gt;"
     )
+
     .replace(
       /"/g,
       "&quot;"
     )
+
     .replace(
       /'/g,
       "&#039;"
@@ -1368,6 +1906,23 @@ async function del(i){
   }
 
 
+  const confirmDelete =
+    confirm(
+      "ต้องการลบรายการนี้หรือไม่?"
+    );
+
+
+  if(!confirmDelete){
+
+    return;
+
+  }
+
+
+  /*
+     เอา QR ออกจาก scanned
+  */
+
   scanned =
     scanned.filter(
       x =>
@@ -1375,26 +1930,37 @@ async function del(i){
     );
 
 
+  /*
+     ลบข้อมูล
+  */
+
   data.splice(
     i,
     1
   );
 
 
+  /*
+     Render
+  */
+
   render();
 
 
   /*
-    Backup หลัง Delete
+     Backup สถานะล่าสุด
   */
 
   if(
     backupFolderHandle
   ){
 
-    await createBackupFile();
+    await createBackupCSV();
 
   }
+
+
+  qr.focus();
 
 }
 
@@ -1402,18 +1968,35 @@ async function del(i){
 /* ============================================================
    SUMMARY
      
-   Row + Part
+     Group:
+       Row + Part
      
-   Unit = จำนวนครั้ง Scan
+     Unit:
+       จำนวนครั้งที่ Scan
      
-   Q'ty = ผลรวม Q'ty
+     Q'ty:
+       Unit × Q'ty ต่อ 1 Scan
      
-   เช่น:
+     ตัวอย่าง:
      
-   Q'ty 53
-   Unit 3
+       Scan 1:
+         Q'ty = 53
      
-   = 159
+       Scan 2:
+         Q'ty = 53
+     
+       Scan 3:
+         Q'ty = 53
+     
+       Unit = 3
+     
+       Summary Q'ty:
+         3 × 53 = 159
+     
+     หากแต่ละ Scan Q'ty ไม่เท่ากัน
+     จะรวมตามจำนวนจริง:
+     
+       53 + 100 + 20 = 173
 ============================================================ */
 
 function renderSummary(){
@@ -1421,73 +2004,107 @@ function renderSummary(){
   let summaryData = {};
 
 
-  data.forEach(x => {
+  /* ==========================================================
+     GROUP
+  ========================================================== */
 
-    const row =
-      String(x.row);
+  data.forEach(
+    x => {
 
-
-    const part =
-      String(
-        x.part || "-"
-      ).trim();
-
-
-    if(
-      !summaryData[row]
-    ){
-
-      summaryData[row] = {};
-
-    }
+      const row =
+        String(
+          x.row
+        );
 
 
-    if(
-      !summaryData[row][part]
-    ){
-
-      summaryData[row][part] = {
-
-        unit:0,
-
-        qty:0
-
-      };
-
-    }
+      const part =
+        String(
+          x.part || "-"
+        ).trim();
 
 
-    /*
-      Unit
-    */
+      if(
+        !summaryData[row]
+      ){
 
-    summaryData[row][part]
-      .unit++;
+        summaryData[row] = {};
 
-
-    /*
-      Q'ty
-    */
-
-    const qty =
-      Number(x.qty);
+      }
 
 
-    if(
-      Number.isFinite(qty)
-    ){
+      if(
+        !summaryData[row][part]
+      ){
+
+        summaryData[row][part] = {
+
+          unit:0,
+
+          qtyPerUnit:0,
+
+          totalQty:0
+
+        };
+
+      }
+
+
+      /* ------------------------------------------------------
+         UNIT
+      ------------------------------------------------------ */
 
       summaryData[row][part]
-        .qty += qty;
+        .unit++;
+
+
+      /* ------------------------------------------------------
+         Q'TY ต่อ Unit
+         
+         ถ้า Scan แรก Q'ty = 53
+         เก็บไว้เป็น 53
+      ------------------------------------------------------ */
+
+      const currentQty =
+        Number(x.qty) || 0;
+
+
+      /*
+         ถ้าเป็น Scan แรก
+         กำหนด Qty ต่อ Unit
+      */
+
+      if(
+        summaryData[row][part]
+          .unit === 1
+      ){
+
+        summaryData[row][part]
+          .qtyPerUnit =
+          currentQty;
+
+      }
+
+
+      /* ------------------------------------------------------
+         TOTAL QTY
+         
+         Unit × Q'ty
+         
+         ถ้าแต่ละ Scan Q'ty เท่ากัน
+         จะเท่ากับ Unit × Q'ty
+      ------------------------------------------------------ */
+
+      summaryData[row][part]
+        .totalQty +=
+        currentQty;
 
     }
+  );
 
-  });
 
-
-  /* ------------------------------------------------------------
+  /* ==========================================================
      EMPTY
-  ------------------------------------------------------------ */
+  ========================================================== */
 
   if(
     Object.keys(
@@ -1499,16 +2116,17 @@ function renderSummary(){
       .getElementById(
         "summary"
       )
-      .innerHTML = "";
+      .innerHTML =
+      "";
 
     return;
 
   }
 
 
-  /* ------------------------------------------------------------
+  /* ==========================================================
      HTML
-  ------------------------------------------------------------ */
+  ========================================================== */
 
   let html = "";
 
@@ -1516,166 +2134,230 @@ function renderSummary(){
   Object.keys(
     summaryData
   )
+
   .sort(
     (a,b) =>
       Number(a) -
       Number(b)
   )
-  .forEach(r => {
 
-    let totalUnit = 0;
+  .forEach(
+    r => {
 
-    let totalQty = 0;
+      let totalUnit = 0;
 
-
-    html += `
-
-      <div class="
-        summary-box
-        ${
-          latestRowFocus == r
-          ? "summary-focus"
-          : ""
-        }
-      ">
-
-        <div class="summary-title">
-          📍 Row ${escapeHtml(r)}
-        </div>
-
-
-        <table
-          style="
-            width:100%;
-            border-collapse:collapse;
-          "
-        >
-
-          <thead>
-
-            <tr>
-
-              <th>
-                Part
-              </th>
-
-              <th>
-                Unit
-              </th>
-
-              <th>
-                Q'ty
-              </th>
-
-            </tr>
-
-          </thead>
-
-
-          <tbody>
-
-    `;
-
-
-    Object.keys(
-      summaryData[r]
-    )
-    .forEach(p => {
-
-      const unit =
-        summaryData[r][p]
-          .unit;
-
-
-      const qty =
-        summaryData[r][p]
-          .qty;
-
-
-      totalUnit +=
-        unit;
-
-
-      totalQty +=
-        qty;
+      let totalQty = 0;
 
 
       html += `
 
-        <tr>
+        <div
+          class="
+            summary-box
+            ${
+              latestRowFocus == r
+              ? "summary-focus"
+              : ""
+            }
+          "
+        >
 
-          <td>
-            ${escapeHtml(p)}
-          </td>
+          <div
+            class="summary-title"
+          >
 
-          <td
+            📍 Row ${escapeHtml(r)}
+
+          </div>
+
+
+          <table
             style="
-              text-align:center;
+              width:100%;
+              border-collapse:collapse;
             "
           >
-            ${unit}
-          </td>
 
-          <td
-            style="
-              text-align:center;
-            "
-          >
-            ${qty}
-          </td>
 
-        </tr>
+            <thead>
+
+              <tr>
+
+                <th>
+                  Part
+                </th>
+
+                <th>
+                  Unit
+                </th>
+
+                <th>
+                  Q'ty / Unit
+                </th>
+
+                <th>
+                  Total Q'ty
+                </th>
+
+              </tr>
+
+            </thead>
+
+
+            <tbody>
 
       `;
 
-    });
+
+      /* ======================================================
+         PARTS
+      ====================================================== */
+
+      Object.keys(
+        summaryData[r]
+      )
+
+      .forEach(
+        p => {
+
+          const unit =
+            summaryData[r][p]
+              .unit;
 
 
-    html += `
+          const qtyPerUnit =
+            summaryData[r][p]
+              .qtyPerUnit;
 
-          </tbody>
+
+          /*
+             Total Qty
+          */
+
+          const totalQtyPart =
+            summaryData[r][p]
+              .totalQty;
 
 
-          <tfoot>
+          totalUnit +=
+            unit;
+
+
+          totalQty +=
+            totalQtyPart;
+
+
+          html += `
 
             <tr>
 
               <td>
-                <b>TOTAL</b>
+                ${escapeHtml(p)}
               </td>
+
 
               <td
                 style="
                   text-align:center;
                 "
               >
-                <b>
-                  ${totalUnit}
-                </b>
+                ${unit}
               </td>
+
 
               <td
                 style="
                   text-align:center;
                 "
               >
-                <b>
-                  ${totalQty}
-                </b>
+                ${qtyPerUnit}
+              </td>
+
+
+              <td
+                style="
+                  text-align:center;
+                  font-weight:bold;
+                "
+              >
+                ${totalQtyPart}
               </td>
 
             </tr>
 
-          </tfoot>
+          `;
 
-        </table>
+        }
+      );
 
-      </div>
 
-    `;
+      /* ======================================================
+         TOTAL
+      ====================================================== */
 
-  });
+      html += `
 
+            </tbody>
+
+
+            <tfoot>
+
+              <tr>
+
+                <td>
+                  <b>TOTAL</b>
+                </td>
+
+
+                <td
+                  style="
+                    text-align:center;
+                  "
+                >
+                  <b>
+                    ${totalUnit}
+                  </b>
+                </td>
+
+
+                <td
+                  style="
+                    text-align:center;
+                  "
+                >
+                  -
+                </td>
+
+
+                <td
+                  style="
+                    text-align:center;
+                  "
+                >
+                  <b>
+                    ${totalQty}
+                  </b>
+                </td>
+
+              </tr>
+
+            </tfoot>
+
+
+          </table>
+
+
+        </div>
+
+      `;
+
+    }
+  );
+
+
+  /* ==========================================================
+     DISPLAY
+  ========================================================== */
 
   document
     .getElementById(
@@ -1689,13 +2371,23 @@ function renderSummary(){
 
 /* ============================================================
    CLEAR
+     
+   IMPORTANT:
+     
+   Clear หน้าเว็บเท่านั้น
+     
+   ไม่ลบ Backup CSV
 ============================================================ */
 
-async function clearAll(){
+function clearAll(){
 
   const confirmClear =
     confirm(
-      "ต้องการล้างข้อมูลทั้งหมดหรือไม่?"
+
+      "ต้องการ Clear ข้อมูลบนหน้าเว็บหรือไม่?\n\n" +
+
+      "ไฟล์ Backup CSV เดิมจะไม่ถูกลบ"
+
     );
 
 
@@ -1733,15 +2425,12 @@ async function clearAll(){
     "none";
 
 
-  /*
-    ไม่ลบไฟล์ Backup เดิม
-
-    เพื่อป้องกันข้อมูลสูญหาย
-  */
-
   setBackupStatus(
-    "⚠ ข้อมูลบนหน้าจอถูก Clear แล้ว แต่ไฟล์ Backup เดิมยังอยู่",
+
+    "⚠ Clear หน้าเว็บแล้ว — Backup CSV เดิมยังอยู่",
+
     "ok"
+
   );
 
 
@@ -1751,422 +2440,86 @@ async function clearAll(){
 
 
 /* ============================================================
-   EXPORT EXCEL
+   EXPORT CSV
+     
+     ดาวน์โหลด CSV ผ่าน Browser
+     
+     ใช้เมื่อผู้ใช้ต้องการ Export
 ============================================================ */
 
-function exportExcel(){
+function exportExcelCompatibleCSV(){
 
-  let wb =
-    XLSX.utils.book_new();
+  if(
+    data.length === 0
+  ){
 
-
-  /* ============================================================
-     RAW DATA
-  ============================================================ */
-
-  let rawData =
-    data.map(x => ({
-
-      Row:
-        x.row,
-
-      Line:
-        x.line,
-
-      Location:
-        x.location,
-
-      Part:
-        x.part,
-
-      "Q'ty":
-        Number(x.qty) || 0,
-
-      PO:
-        x.po,
-
-      LOT:
-        x.lot,
-
-      Remark:
-        x.remark,
-
-      Time:
-        x.time
-
-    }));
-
-
-  let ws1 =
-    XLSX.utils.json_to_sheet(
-      rawData
+    alert(
+      "ยังไม่มีข้อมูลสำหรับ Export"
     );
 
-
-  XLSX.utils.book_append_sheet(
-    wb,
-    ws1,
-    "RawData"
-  );
-
-
-  /* ============================================================
-     SUMMARY DATA
-  ============================================================ */
-
-  let summaryData = {};
-
-
-  data.forEach(x => {
-
-    const row =
-      String(x.row);
-
-
-    const part =
-      String(
-        x.part || "-"
-      ).trim();
-
-
-    if(
-      !summaryData[row]
-    ){
-
-      summaryData[row] = {};
-
-    }
-
-
-    if(
-      !summaryData[row][part]
-    ){
-
-      summaryData[row][part] = {
-
-        unit:0,
-
-        qty:0
-
-      };
-
-    }
-
-
-    summaryData[row][part]
-      .unit++;
-
-
-    const qty =
-      Number(x.qty);
-
-
-    if(
-      Number.isFinite(qty)
-    ){
-
-      summaryData[row][part]
-        .qty += qty;
-
-    }
-
-  });
-
-
-  /* ============================================================
-     BUILD SUMMARY
-  ============================================================ */
-
-  let summarySheet = [];
-
-
-  Object.keys(
-    summaryData
-  )
-  .sort(
-    (a,b) =>
-      Number(a) -
-      Number(b)
-  )
-  .forEach(r => {
-
-    let totalUnit = 0;
-
-    let totalQty = 0;
-
-
-    Object.keys(
-      summaryData[r]
-    )
-    .forEach(p => {
-
-      const unit =
-        summaryData[r][p]
-          .unit;
-
-
-      const qty =
-        summaryData[r][p]
-          .qty;
-
-
-      totalUnit +=
-        unit;
-
-
-      totalQty +=
-        qty;
-
-
-      summarySheet.push({
-
-        Row:
-          r,
-
-        Part:
-          p,
-
-        Unit:
-          unit,
-
-        "Q'ty":
-          qty
-
-      });
-
-    });
-
-
-    /* ----------------------------------------------------------
-       TOTAL
-    ---------------------------------------------------------- */
-
-    summarySheet.push({
-
-      Row:
-        r,
-
-      Part:
-        "TOTAL",
-
-      Unit:
-        totalUnit,
-
-      "Q'ty":
-        totalQty
-
-    });
-
-  });
-
-
-  /* ============================================================
-     SUMMARY WORKSHEET
-  ============================================================ */
-
-  let ws2 =
-    XLSX.utils.json_to_sheet(
-      summarySheet
-    );
-
-
-  /* ============================================================
-     STYLE
-  ============================================================ */
-
-  if(ws2["!ref"]){
-
-    let range =
-      XLSX.utils.decode_range(
-        ws2["!ref"]
-      );
-
-
-    for(
-      let R = range.s.r;
-      R <= range.e.r;
-      R++
-    ){
-
-      for(
-        let C = range.s.c;
-        C <= range.e.c;
-        C++
-      ){
-
-        let addr =
-          XLSX.utils.encode_cell({
-            r:R,
-            c:C
-          });
-
-
-        let cell =
-          ws2[addr];
-
-
-        if(!cell){
-
-          continue;
-
-        }
-
-
-        /* HEADER */
-
-        if(R === 0){
-
-          cell.s = {
-
-            font:{
-
-              bold:true,
-
-              color:{
-                rgb:"FFFFFF"
-              }
-
-            },
-
-            fill:{
-
-              fgColor:{
-                rgb:"4472C4"
-              }
-
-            }
-
-          };
-
-        }
-
-
-        /* TOTAL */
-
-        if(
-          cell.v === "TOTAL"
-        ){
-
-          for(
-            let i = 0;
-            i <= 3;
-            i++
-          ){
-
-            let totalAddr =
-              XLSX.utils.encode_cell({
-
-                r:R,
-
-                c:i
-
-              });
-
-
-            if(
-              ws2[totalAddr]
-            ){
-
-              ws2[
-                totalAddr
-              ].s = {
-
-                font:{
-                  bold:true
-                },
-
-                fill:{
-
-                  fgColor:{
-                    rgb:"B7DEE8"
-                  }
-
-                }
-
-              };
-
-            }
-
-          }
-
-        }
-
-      }
-
-    }
+    return;
 
   }
 
 
-  /* ============================================================
-     AUTO WIDTH
-  ============================================================ */
-
-  let cols = [];
+  const csv =
+    createCSVContent();
 
 
-  summarySheet.forEach(
-    row => {
+  const blob =
+    new Blob(
 
-      Object.keys(row)
-        .forEach(
-          (k,i) => {
+      [csv],
 
-            let len =
-              String(
-                row[k]
-              ).length;
+      {
+        type:
+          "text/csv;charset=utf-8;"
+      }
 
-
-            if(!cols[i]){
-
-              cols[i] = {
-                wch:10
-              };
-
-            }
+    );
 
 
-            if(
-              len >
-              cols[i].wch
-            ){
-
-              cols[i].wch =
-                len + 4;
-
-            }
-
-          }
-        );
-
-    }
-  );
+  const url =
+    URL.createObjectURL(
+      blob
+    );
 
 
-  ws2["!cols"] =
-    cols;
+  const a =
+    document.createElement(
+      "a"
+    );
 
 
-  /* ============================================================
-     APPEND SUMMARY
-  ============================================================ */
-
-  XLSX.utils.book_append_sheet(
-    wb,
-    ws2,
-    "Summary"
-  );
+  a.href =
+    url;
 
 
-  /* ============================================================
-     DOWNLOAD
-  ============================================================ */
+  a.download =
 
-  XLSX.writeFile(
-    wb,
-    "inventory_report.xlsx"
-  );
+    BACKUP_FILE_PREFIX +
+
+    "_" +
+
+    getDateString() +
+
+    "_" +
+
+    getTimeString() +
+
+    ".csv";
+
+
+  document.body.appendChild(a);
+
+
+  a.click();
+
+
+  document.body.removeChild(a);
+
+
+  URL.revokeObjectURL(url);
 
 }
 
@@ -2176,17 +2529,41 @@ function exportExcel(){
 ============================================================ */
 
 if(
-  !isFileSystemAccessSupported()
+  !isBackupSupported()
 ){
 
   setBackupStatus(
-    "⚠ Browser นี้ไม่รองรับ Auto Backup ลงโฟลเดอร์ กรุณาใช้ Chrome หรือ Edge",
+
+    "⚠ Browser ไม่รองรับ Auto Backup ลง C:\\ กรุณาใช้ Chrome หรือ Edge",
+
     "error"
+
+  );
+
+}
+else{
+
+  setBackupStatus(
+
+    "⚠ กรุณากด 'ตั้งค่า C:\\Count stock' ครั้งแรก",
+
+    ""
+
   );
 
 }
 
+
+/* ============================================================
+   INITIAL FOCUS
+============================================================ */
+
+qr.focus();
+
+
 </script>
 
+
 </body>
+
 </html>
